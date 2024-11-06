@@ -1,0 +1,67 @@
+{
+	"name": "dim_go_product",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dim_goProduct_stagging-00001.parquet",
+				"folderPath": "dim_goProduct",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "PRODUCT_NUMBER",
+				"type": "INT32"
+			},
+			{
+				"name": "INTRODUCTION_DATE",
+				"type": "INT96"
+			},
+			{
+				"name": "PRODUCT_TYPE_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "PRODUCTION_COST",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "MARGIN",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "PRODUCT_IMAGE",
+				"type": "UTF8"
+			},
+			{
+				"name": "PRODUCT_NAME",
+				"type": "UTF8"
+			},
+			{
+				"name": "PRODUCT_LINE_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "PRODUCT_TYPE_EN",
+				"type": "UTF8"
+			},
+			{
+				"name": "Source",
+				"type": "UTF8"
+			},
+			{
+				"name": "ProductID",
+				"type": "UTF8"
+			}
+		]
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

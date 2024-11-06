@@ -1,0 +1,148 @@
+{
+	"name": "sourceTdatalake_achrm",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach_qyl",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.cw_items",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy_qyl",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [
+								{
+									"name": "Source",
+									"value": "dbo.@{item().source.table}"
+								},
+								{
+									"name": "Destination",
+									"value": "fsngroup6/ACHRM/@{item().destination.fileName}"
+								}
+							],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": true,
+								"stagingSettings": {
+									"linkedServiceName": {
+										"referenceName": "lsconnection",
+										"type": "LinkedServiceReference"
+									},
+									"path": "fsngroup6/staging/achrm"
+								},
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": false
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "lsconnection",
+											"type": "LinkedServiceReference"
+										},
+										"path": "fsngroup6/logging/achrm"
+									}
+								},
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "SourceDataset_qyl",
+									"type": "DatasetReference",
+									"parameters": {
+										"cw_table": "@item().source.table"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DestinationDataset_qyl",
+									"type": "DatasetReference",
+									"parameters": {
+										"cw_fileName": "@item().destination.fileName"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"cw_items": {
+				"type": "Array",
+				"defaultValue": [
+					{
+						"source": {
+							"table": "achrm_bonus"
+						},
+						"destination": {
+							"fileName": "dbo.achrm_bonus.parquet"
+						}
+					},
+					{
+						"source": {
+							"table": "achrm_department"
+						},
+						"destination": {
+							"fileName": "dbo.achrm_department.parquet"
+						}
+					},
+					{
+						"source": {
+							"table": "achrm_employee"
+						},
+						"destination": {
+							"fileName": "dbo.achrm_employee.parquet"
+						}
+					},
+					{
+						"source": {
+							"table": "achrm_job"
+						},
+						"destination": {
+							"fileName": "dbo.achrm_job.parquet"
+						}
+					}
+				]
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-10-21T10:58:01Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

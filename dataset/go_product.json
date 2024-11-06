@@ -1,0 +1,51 @@
+{
+	"name": "go_product",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dbo.go_PRODUCT.parquet",
+				"folderPath": "GO",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "PRODUCT_NUMBER",
+				"type": "INT32"
+			},
+			{
+				"name": "INTRODUCTION_DATE",
+				"type": "INT96"
+			},
+			{
+				"name": "PRODUCT_TYPE_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "PRODUCTION_COST",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "MARGIN",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "PRODUCT_IMAGE",
+				"type": "UTF8"
+			},
+			{
+				"name": "PRODUCT_NAME",
+				"type": "UTF8"
+			}
+		]
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

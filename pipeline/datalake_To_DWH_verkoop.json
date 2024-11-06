@@ -1,0 +1,167 @@
+{
+	"name": "datalake_To_DWH_verkoop",
+	"properties": {
+		"activities": [
+			{
+				"name": "go_to_dwh_location",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "mapping_country_code",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ParquetSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "ParquetReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "upsert",
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"LocationID",
+								"Source"
+							]
+						},
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "SALES_BRANCH_CODE",
+									"type": "INT32"
+								},
+								"sink": {
+									"name": "LocationID",
+									"type": "int",
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "COUNTRY",
+									"type": "UTF8"
+								},
+								"sink": {
+									"name": "Country",
+									"type": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "REGION",
+									"type": "UTF8"
+								},
+								"sink": {
+									"name": "State",
+									"type": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "CITY",
+									"type": "UTF8"
+								},
+								"sink": {
+									"name": "City",
+									"type": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Source",
+									"type": "UTF8"
+								},
+								"sink": {
+									"name": "Source",
+									"type": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ADDRESS1",
+									"type": "UTF8"
+								},
+								"sink": {
+									"name": "Address",
+									"type": "nvarchar"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "codeCountry",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "dwh_verkopen",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "mapping_country_code",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "mapping_country",
+						"type": "DataFlowReference",
+						"parameters": {
+							"go": "'go'"
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2024-11-06T14:14:15Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

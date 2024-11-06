@@ -1,0 +1,172 @@
+{
+	"name": "sourceTdatalake_anc",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach_qq9",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.cw_items",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy_qq9",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [
+								{
+									"name": "Source",
+									"value": "dbo.@{item().source.table}"
+								},
+								{
+									"name": "Destination",
+									"value": "fsngroup6/ANC/@{item().destination.fileName}"
+								}
+							],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": true,
+								"stagingSettings": {
+									"linkedServiceName": {
+										"referenceName": "lsconnection",
+										"type": "LinkedServiceReference"
+									},
+									"path": "fsngroup6/staging/anc"
+								},
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": false
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "lsconnection",
+											"type": "LinkedServiceReference"
+										},
+										"path": "fsngroup6/logging/anc"
+									}
+								},
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "SourceDataset_qq9",
+									"type": "DatasetReference",
+									"parameters": {
+										"cw_table": "@item().source.table"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DestinationDataset_qq9",
+									"type": "DatasetReference",
+									"parameters": {
+										"cw_fileName": "@item().destination.fileName"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"cw_items": {
+				"type": "Array",
+				"defaultValue": [
+					{
+						"source": {
+							"table": "anc_customer"
+						},
+						"destination": {
+							"fileName": "dbo.anc_customer.parquet"
+						}
+					},
+					{
+						"source": {
+							"table": "anc_department"
+						},
+						"destination": {
+							"fileName": "dbo.anc_department.parquet"
+						}
+					},
+					{
+						"source": {
+							"table": "anc_employee"
+						},
+						"destination": {
+							"fileName": "dbo.anc_employee.parquet"
+						}
+					},
+					{
+						"source": {
+							"table": "anc_fin_code"
+						},
+						"destination": {
+							"fileName": "dbo.anc_fin_code.parquet"
+						}
+					},
+					{
+						"source": {
+							"table": "anc_product"
+						},
+						"destination": {
+							"fileName": "dbo.anc_product.parquet"
+						}
+					},
+					{
+						"source": {
+							"table": "anc_sales_order"
+						},
+						"destination": {
+							"fileName": "dbo.anc_sales_order.parquet"
+						}
+					},
+					{
+						"source": {
+							"table": "anc_sales_order_item"
+						},
+						"destination": {
+							"fileName": "dbo.anc_sales_order_item.parquet"
+						}
+					}
+				]
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-10-21T11:00:18Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

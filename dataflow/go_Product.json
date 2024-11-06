@@ -1,0 +1,146 @@
+{
+	"name": "go_Product",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "go_product",
+						"type": "DatasetReference"
+					},
+					"name": "go"
+				},
+				{
+					"dataset": {
+						"referenceName": "goProductType",
+						"type": "DatasetReference"
+					},
+					"name": "goProductType"
+				},
+				{
+					"dataset": {
+						"referenceName": "ancProduct",
+						"type": "DatasetReference"
+					},
+					"name": "ancProduct"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "lsconnection",
+						"type": "LinkedServiceReference"
+					},
+					"name": "goProduct",
+					"rejectedDataLinkedService": {
+						"referenceName": "lsconnection",
+						"type": "LinkedServiceReference"
+					}
+				},
+				{
+					"linkedService": {
+						"referenceName": "lsconnection",
+						"type": "LinkedServiceReference"
+					},
+					"name": "dimAncProduct"
+				}
+			],
+			"transformations": [
+				{
+					"name": "joinProductProductType"
+				},
+				{
+					"name": "addSourceColumn"
+				},
+				{
+					"name": "mappingIDSource"
+				},
+				{
+					"name": "addSourceColumn2"
+				},
+				{
+					"name": "mappingIDSource2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          PRODUCT_NUMBER as integer,",
+				"          INTRODUCTION_DATE as timestamp,",
+				"          PRODUCT_TYPE_CODE as integer,",
+				"          PRODUCTION_COST as double,",
+				"          MARGIN as double,",
+				"          PRODUCT_IMAGE as string,",
+				"          PRODUCT_NAME as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> go",
+				"source(output(",
+				"          PRODUCT_TYPE_CODE as integer,",
+				"          PRODUCT_LINE_CODE as integer,",
+				"          PRODUCT_TYPE_EN as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> goProductType",
+				"source(output(",
+				"          id as integer,",
+				"          name as string,",
+				"          description as string,",
+				"          prod_size as string,",
+				"          color as string,",
+				"          quantity as integer,",
+				"          unit_price as decimal(18,0),",
+				"          picture_name as string,",
+				"          category as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> ancProduct",
+				"go, goProductType join(go@PRODUCT_TYPE_CODE == goProductType@PRODUCT_TYPE_CODE,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinProductProductType",
+				"joinProductProductType derive(Source = 'GO') ~> addSourceColumn",
+				"addSourceColumn derive(ProductKey = concatWS('_',toString(PRODUCT_NUMBER),Source),",
+				"          ProductID = PRODUCT_NUMBER,",
+				"          productdescription = '') ~> mappingIDSource",
+				"ancProduct derive(Source = 'ANC') ~> addSourceColumn2",
+				"addSourceColumn2 derive(ProductKey = concatWS(\"_\", toString(id), Source),",
+				"          ProductID = id,",
+				"          productioncost = 0,",
+				"          Producttype = 0) ~> mappingIDSource2",
+				"mappingIDSource sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     fileSystem: 'fsngroup6',",
+				"     folderPath: 'dim_goProduct',",
+				"     truncate: true,",
+				"     compressionCodec: 'none',",
+				"     filePattern:'dim_goProduct_stagging.parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> goProduct",
+				"mappingIDSource2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     fileSystem: 'fsngroup6',",
+				"     folderPath: 'dim_AncProduct',",
+				"     truncate: true,",
+				"     filePattern:'dim_AncProduct_stagging.parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> dimAncProduct"
+			]
+		}
+	}
+}

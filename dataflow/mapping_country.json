@@ -1,0 +1,92 @@
+{
+	"name": "mapping_country",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "datalake_location",
+						"type": "DatasetReference"
+					},
+					"name": "code"
+				},
+				{
+					"dataset": {
+						"referenceName": "Country",
+						"type": "DatasetReference"
+					},
+					"name": "counrty"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "lsconnection",
+						"type": "LinkedServiceReference"
+					},
+					"name": "codeCounrty",
+					"rejectedDataLinkedService": {
+						"referenceName": "lsconnection",
+						"type": "LinkedServiceReference"
+					}
+				}
+			],
+			"transformations": [
+				{
+					"name": "innerJoinCountry"
+				},
+				{
+					"name": "addSource"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     go as string ('go')",
+				"}",
+				"source(output(",
+				"          SALES_BRANCH_CODE as integer,",
+				"          ADDRESS1 as string,",
+				"          ADDRESS2 as string,",
+				"          CITY as string,",
+				"          REGION as string,",
+				"          POSTAL_ZONE as string,",
+				"          COUNTRY_CODE as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> code",
+				"source(output(",
+				"          COUNTRY_CODE as integer,",
+				"          COUNTRY as string,",
+				"          LANGUAGE as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> counrty",
+				"code, counrty join(code@COUNTRY_CODE == counrty@COUNTRY_CODE,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> innerJoinCountry",
+				"innerJoinCountry derive(Source = $go) ~> addSource",
+				"addSource sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     fileSystem: 'fsngroup6',",
+				"     folderPath: 'code_country',",
+				"     truncate: true,",
+				"     compressionCodec: 'none',",
+				"     filePattern:'codeCountry_stagging',",
+				"     umask: 0222,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1) ~> codeCounrty"
+			]
+		}
+	}
+}

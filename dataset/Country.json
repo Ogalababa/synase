@@ -1,0 +1,35 @@
+{
+	"name": "Country",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dbo.go_COUNTRY.parquet",
+				"folderPath": "GO",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "COUNTRY_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "COUNTRY",
+				"type": "UTF8"
+			},
+			{
+				"name": "LANGUAGE",
+				"type": "UTF8"
+			}
+		]
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

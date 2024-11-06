@@ -1,0 +1,34 @@
+{
+	"name": "DestinationDataset_qyl",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cw_fileName": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().cw_fileName",
+					"type": "Expression"
+				},
+				"folderPath": "ACHRM",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "none",
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\"",
+			"firstRowAsHeader": true
+		},
+		"schema": []
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}
