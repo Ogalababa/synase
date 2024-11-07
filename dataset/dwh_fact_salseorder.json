@@ -1,0 +1,67 @@
+{
+	"name": "dwh_fact_salseorder",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DWH",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "SalesorderID",
+				"type": "varchar"
+			},
+			{
+				"name": "DIM_ProductProductID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "DIM_DateDateID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "DIM_CustomerCustomerID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "DIM_SalesLocation",
+				"type": "varchar"
+			},
+			{
+				"name": "DIM_EmployeeEmployeeID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Price",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Discount",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "DIM_EmployeeEmployeeKkey",
+				"type": "varchar"
+			},
+			{
+				"name": "DIM_CustomerCustomerKey",
+				"type": "varchar"
+			},
+			{
+				"name": "DIM_ProductProductKey",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "FACT_Salesorder"
+		}
+	}
+}

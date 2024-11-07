@@ -1,0 +1,134 @@
+{
+	"name": "fact_salseorder",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "fact_salesorder_stagging.parquet",
+				"folderPath": "fact_Salesorder",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "ORDER_DETAIL_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "ORDER_NUMBER",
+				"type": "INT32"
+			},
+			{
+				"name": "PRODUCT_NUMBER",
+				"type": "INT32"
+			},
+			{
+				"name": "QUANTITY",
+				"type": "INT32"
+			},
+			{
+				"name": "UNIT_COST",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "UNIT_PRICE",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "UNIT_SALE_PRICE",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "LineTotal",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "DiscountUnitPrice",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "ActualUnitPrice",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "RETAILER_NAME",
+				"type": "UTF8"
+			},
+			{
+				"name": "RETAILER_SITE_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "RETAILER_COUNTACT_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "SALES_STAFF_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "SALES_BRANCH_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "ORDER_DATE",
+				"type": "INT96"
+			},
+			{
+				"name": "ORDER_METHOD_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "Employeekey",
+				"type": "UTF8"
+			},
+			{
+				"name": "DateID",
+				"type": "INT32"
+			},
+			{
+				"name": "SalesorderID",
+				"type": "UTF8"
+			},
+			{
+				"name": "EployeeID",
+				"type": "INT32"
+			},
+			{
+				"name": "DepartmentID",
+				"type": "INT32"
+			},
+			{
+				"name": "Firstname",
+				"type": "UTF8"
+			},
+			{
+				"name": "Lastname",
+				"type": "UTF8"
+			},
+			{
+				"name": "Department",
+				"type": "UTF8"
+			},
+			{
+				"name": "Employeestatus",
+				"type": "INT32"
+			},
+			{
+				"name": "Startdate",
+				"type": "DATE"
+			},
+			{
+				"name": "Enddate",
+				"type": "DATE"
+			}
+		]
+	}
+}
