@@ -66,6 +66,241 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('workspaceName'), '/datalae_To_DWH_Fact_Salesorder')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "mapping Salarypayment",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "mapping_fact_salesorder",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"ProductID": {},
+									"CustomerID": {},
+									"EmployeeID": {},
+									"orderdetailsGO": {},
+									"orderHeader": {},
+									"goDalesorder": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "Copy fact salesorder Go",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "mapping Salarypayment",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "SalesorderID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "SalesorderID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ProductID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "DIM_ProductProductKey",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CustomerID",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "DIM_CustomerCustomerKey",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "LocationID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "DIM_SalesLocation",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "EmployeeID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "DIM_EmployeeEmployeekey",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "DateID",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "DIM_DateDateID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "LineTotal",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										},
+										"sink": {
+											"name": "LineTotal",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UNIT_PRICE",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										},
+										"sink": {
+											"name": "UnitPrice",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "DiscountUnitPrice",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										},
+										"sink": {
+											"name": "DiscountUnitPrice",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ActualUnitPrice",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										},
+										"sink": {
+											"name": "ActualUnitPrice",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "fact_salseorder",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "dwh_fact_salseorder",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/mapping_fact_salesorder')]",
+				"[concat(variables('workspaceId'), '/datasets/fact_salseorder')]",
+				"[concat(variables('workspaceId'), '/datasets/dwh_fact_salseorder')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/datalake_To_DWH_Dim_Customer')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
@@ -2894,6 +3129,63 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/db_go_order_details')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sourcedb",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ORDER_DETAIL_CODE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ORDER_NUMBER",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PRODUCT_NUMBER",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "QUANTITY",
+						"type": "smallint",
+						"precision": 5
+					},
+					{
+						"name": "UNIT_COST",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "UNIT_PRICE",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "UNIT_SALE_PRICE",
+						"type": "float",
+						"precision": 15
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "go_ORDER_DETAILS"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/sourcedb')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/dim_ANC_customer2')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -4009,6 +4301,150 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/dwh_fact_Salesorder')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "SalesorderID",
+						"type": "varchar"
+					},
+					{
+						"name": "DIM_ProductProductID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "DIM_DateDateID",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "DIM_CustomerCustomerID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "DIM_SalesLocation",
+						"type": "varchar"
+					},
+					{
+						"name": "DIM_EmployeeEmployeeID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Price",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Discount",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "DIM_EmployeeEmployeeKkey",
+						"type": "varchar"
+					},
+					{
+						"name": "DIM_CustomerCustomerKey",
+						"type": "varchar"
+					},
+					{
+						"name": "DIM_ProductProductKey",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "FACT_Salesorder"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/DWH')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dwh_fact_salseorder')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "SalesorderID",
+						"type": "varchar"
+					},
+					{
+						"name": "DIM_ProductProductID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "DIM_DateDateID",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "DIM_CustomerCustomerID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "DIM_SalesLocation",
+						"type": "varchar"
+					},
+					{
+						"name": "DIM_EmployeeEmployeeID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Price",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Discount",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "DIM_EmployeeEmployeeKkey",
+						"type": "varchar"
+					},
+					{
+						"name": "DIM_CustomerCustomerKey",
+						"type": "varchar"
+					},
+					{
+						"name": "DIM_ProductProductKey",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "FACT_Salesorder"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/DWH')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/dwh_go_customer')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -4108,6 +4544,145 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/fact_salseorder')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "fact_salesorder_stagging.parquet",
+						"folderPath": "fact_Salesorder",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "ORDER_DETAIL_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "ORDER_NUMBER",
+						"type": "INT32"
+					},
+					{
+						"name": "PRODUCT_NUMBER",
+						"type": "INT32"
+					},
+					{
+						"name": "QUANTITY",
+						"type": "INT32"
+					},
+					{
+						"name": "UNIT_COST",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "UNIT_PRICE",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "UNIT_SALE_PRICE",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "LineTotal",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "DiscountUnitPrice",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "ActualUnitPrice",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "RETAILER_NAME",
+						"type": "UTF8"
+					},
+					{
+						"name": "RETAILER_SITE_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "RETAILER_COUNTACT_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "SALES_STAFF_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "SALES_BRANCH_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "ORDER_DATE",
+						"type": "INT96"
+					},
+					{
+						"name": "ORDER_METHOD_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "Employeekey",
+						"type": "UTF8"
+					},
+					{
+						"name": "DateID",
+						"type": "INT32"
+					},
+					{
+						"name": "SalesorderID",
+						"type": "UTF8"
+					},
+					{
+						"name": "EployeeID",
+						"type": "INT32"
+					},
+					{
+						"name": "DepartmentID",
+						"type": "INT32"
+					},
+					{
+						"name": "Firstname",
+						"type": "UTF8"
+					},
+					{
+						"name": "Lastname",
+						"type": "UTF8"
+					},
+					{
+						"name": "Department",
+						"type": "UTF8"
+					},
+					{
+						"name": "Employeestatus",
+						"type": "INT32"
+					},
+					{
+						"name": "Startdate",
+						"type": "DATE"
+					},
+					{
+						"name": "Enddate",
+						"type": "DATE"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/goProductType')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -4144,6 +4719,68 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/go_order_header')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sourcedb",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ORDER_NUMBER",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "RETAILER_NAME",
+						"type": "nvarchar"
+					},
+					{
+						"name": "RETAILER_SITE_CODE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "RETAILER_COUNTACT_CODE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SALES_STAFF_CODE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SALES_BRANCH_CODE",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ORDER_DATE",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "ORDER_METHOD_CODE",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "go_ORDER_HEADER"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/sourcedb')]"
 			]
 		},
 		{
@@ -4699,10 +5336,10 @@
 						"     matchType:'exact',",
 						"     ignoreSpaces: false,",
 						"     broadcast: 'auto')~> mappingANC",
-						"mappingANC derive(EmployeeKey = concatWS('_', toString(emp_id), '_ANC'),",
+						"mappingANC derive(EmployeeKey = concatWS('_', toString(emp_id), 'ANC'),",
 						"          start_date = toDate(start_date),",
 						"          termination_date = toDate(termination_date),",
-						"          LocationID = concatWS('_', toString(emp_id), '_ANC_EMPLOYEE'),",
+						"          LocationID = concatWS('_', toString(emp_id), 'ANC'),",
 						"          Country = '') ~> derivedColumn2",
 						"derivedColumn1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
@@ -4723,6 +5360,7 @@
 						"     fileSystem: 'fsngroup6',",
 						"     folderPath: 'dim_anc_employee',",
 						"     truncate: true,",
+						"     compressionCodec: 'none',",
 						"     filePattern:'dim_anc_employee_stagging.parquet',",
 						"     umask: 0022,",
 						"     preCommands: [],",
@@ -4999,8 +5637,8 @@
 						"     matchType:'exact',",
 						"     ignoreSpaces: false,",
 						"     broadcast: 'auto')~> joinCountry",
-						"joinCountry derive(LocationID = concatWS('_', toString(SALES_BRANCH_CODE), '_GO')) ~> mappingDimLoacation",
-						"ancCustomer derive(LocationID = concatWS('_', toString(id), '_ANC_CUSTOMER'),",
+						"joinCountry derive(LocationID = concatWS('_', toString(SALES_BRANCH_CODE), 'GO')) ~> mappingDimLoacation",
+						"ancCustomer derive(LocationID = concatWS('_', toString(id), 'ANC'),",
 						"          Adress2 = '',",
 						"          Country = '') ~> mappingANCcustomer",
 						"mappingDimLoacation sink(allowSchemaDrift: true,",
@@ -5138,16 +5776,16 @@
 						"     validateSchema: false,",
 						"     ignoreNoFilesFound: false,",
 						"     format: 'parquet') ~> source2",
-						"goCustomer derive(CustomerKey = concatWS('_', toString(RETAILER_CODE), \"_GO\"),",
-						"          CustomerLocation = concatWS('_', toString(RETAILER_CODE), \"_GO\"),",
-						"          Discount = '',",
+						"goCustomer derive(CustomerKey = concatWS('_', toString(RETAILER_CODE), \"GO\"),",
+						"          CustomerLocation = concatWS('_', toString(RETAILER_CODE), \"GO\"),",
+						"          Discount = 0,",
 						"          Name = '') ~> derivedColumn1",
 						"source1, derivedColumn1 join(LocationID == CustomerLocation,",
 						"     joinType:'inner',",
 						"     matchType:'exact',",
 						"     ignoreSpaces: false,",
 						"     broadcast: 'auto')~> join1",
-						"source2 derive(CustomerKey = concatWS('_', toString(id), '_ANC_CUSTOMER')) ~> derivedColumn2",
+						"source2 derive(CustomerKey = concatWS('_', toString(id), 'ANC')) ~> derivedColumn2",
 						"derivedColumn2, source1 join(CustomerKey == LocationID,",
 						"     joinType:'inner',",
 						"     matchType:'exact',",
@@ -5190,24 +5828,198 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/mapping_fact_salesorder')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "dim_product_anc",
+								"type": "DatasetReference"
+							},
+							"name": "ProductID"
+						},
+						{
+							"dataset": {
+								"referenceName": "dwh_go_customer",
+								"type": "DatasetReference"
+							},
+							"name": "CustomerID"
+						},
+						{
+							"dataset": {
+								"referenceName": "dwh_anc_employee",
+								"type": "DatasetReference"
+							},
+							"name": "EmployeeID"
+						},
+						{
+							"dataset": {
+								"referenceName": "db_go_order_details",
+								"type": "DatasetReference"
+							},
+							"name": "orderdetailsGO"
+						},
+						{
+							"dataset": {
+								"referenceName": "go_order_header",
+								"type": "DatasetReference"
+							},
+							"name": "orderHeader"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "lsconnection",
+								"type": "LinkedServiceReference"
+							},
+							"name": "goDalesorder"
+						}
+					],
+					"transformations": [
+						{
+							"name": "LineTotal"
+						},
+						{
+							"name": "joinOrderHeader"
+						},
+						{
+							"name": "EmployeelKey"
+						},
+						{
+							"name": "joinEmployeelID"
+						},
+						{
+							"name": "derivedColumn1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          ProductKey as string,",
+						"          ProductID as integer,",
+						"          Productname as string,",
+						"          Producttype as integer,",
+						"          Productioncost as double,",
+						"          Productcode as string,",
+						"          Productcatagory as string,",
+						"          Productdescription as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> ProductID",
+						"source(output(",
+						"          CustomerKey as string,",
+						"          CustomerID as integer,",
+						"          DIM_Customerlocation as string,",
+						"          Name as string,",
+						"          Discount as integer,",
+						"          Companyname as string,",
+						"          Customeradress as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> CustomerID",
+						"source(output(",
+						"          Employeekey as string,",
+						"          EployeeID as integer,",
+						"          DepartmentID as integer,",
+						"          Firstname as string,",
+						"          Lastname as string,",
+						"          Department as string,",
+						"          Employeestatus as integer,",
+						"          Startdate as date,",
+						"          Enddate as date",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> EmployeeID",
+						"source(output(",
+						"          ORDER_DETAIL_CODE as integer,",
+						"          ORDER_NUMBER as integer,",
+						"          PRODUCT_NUMBER as integer,",
+						"          QUANTITY as integer,",
+						"          UNIT_COST as double,",
+						"          UNIT_PRICE as double,",
+						"          UNIT_SALE_PRICE as double",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> orderdetailsGO",
+						"source(output(",
+						"          ORDER_NUMBER as integer,",
+						"          RETAILER_NAME as string,",
+						"          RETAILER_SITE_CODE as integer,",
+						"          RETAILER_COUNTACT_CODE as integer,",
+						"          SALES_STAFF_CODE as integer,",
+						"          SALES_BRANCH_CODE as integer,",
+						"          ORDER_DATE as timestamp,",
+						"          ORDER_METHOD_CODE as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> orderHeader",
+						"orderdetailsGO derive(LineTotal = QUANTITY*UNIT_SALE_PRICE,",
+						"          DiscountUnitPrice = UNIT_SALE_PRICE,",
+						"          ActualUnitPrice = UNIT_SALE_PRICE) ~> LineTotal",
+						"LineTotal, orderHeader join(orderdetailsGO@ORDER_NUMBER == orderHeader@ORDER_NUMBER,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> joinOrderHeader",
+						"joinOrderHeader derive(Employeekey = concatWS('_', toString(SALES_STAFF_CODE), 'GO'),",
+						"          DateID = toDate(ORDER_DATE) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
+						"          SalesorderID = concatWS('_', concatWS('_', toString(ORDER_DETAIL_CODE), toString(PRODUCT_NUMBER)), toString(QUANTITY))) ~> EmployeelKey",
+						"EmployeelKey, EmployeeID join(EmployeelKey@Employeekey == EmployeeID@Employeekey,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> joinEmployeelID",
+						"joinEmployeelID derive(ProductID = concatWS('_', toString(PRODUCT_NUMBER), 'GO'),",
+						"          LocationID = concatWS('_', toString(SALES_BRANCH_CODE), 'GO'),",
+						"          EmployeeID = EmployeelKey@Employeekey,",
+						"          CustomerID = 0) ~> derivedColumn1",
+						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     fileSystem: 'fsngroup6',",
+						"     folderPath: 'fact_Salesorder',",
+						"     truncate: true,",
+						"     compressionCodec: 'none',",
+						"     partitionFileNames:['fact_salesorder_stagging.parquet'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> goDalesorder"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/dim_product_anc')]",
+				"[concat(variables('workspaceId'), '/datasets/dwh_go_customer')]",
+				"[concat(variables('workspaceId'), '/datasets/dwh_anc_employee')]",
+				"[concat(variables('workspaceId'), '/datasets/db_go_order_details')]",
+				"[concat(variables('workspaceId'), '/datasets/go_order_header')]",
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
 			"type": "Microsoft.Synapse/workspaces/credentials",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"type": "ManagedIdentity",
 				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Pipeline 1')]",
-			"type": "Microsoft.Synapse/workspaces/pipelines",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": []
 			},
 			"dependsOn": []
 		}
