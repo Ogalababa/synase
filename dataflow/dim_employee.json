@@ -119,7 +119,7 @@
 				"mappingANC derive(EmployeeKey = concatWS('_', toString(emp_id), 'ANC'),",
 				"          start_date = toDate(start_date),",
 				"          termination_date = toDate(termination_date),",
-				"          LocationID = concatWS('_', toString(emp_id), '_ANC_EMPLOYEE'),",
+				"          LocationID = concatWS('_', toString(emp_id), 'ANC_EMPLOYEE'),",
 				"          Country = '') ~> derivedColumn2",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
