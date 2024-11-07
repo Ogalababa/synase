@@ -15,6 +15,12 @@
 					"referenceName": "sourceTdatalake_anc",
 					"type": "PipelineReference"
 				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "sourceTdatalake_achrm",
+					"type": "PipelineReference"
+				}
 			}
 		],
 		"type": "ScheduleTrigger",
