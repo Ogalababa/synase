@@ -5,8 +5,6 @@
 			{
 				"name": "mapping Salarypayment",
 				"type": "ExecuteDataFlow",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -81,10 +79,51 @@
 								}
 							},
 							{
+								"source": {
+									"name": "ProductID",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
 								"sink": {
-									"name": "DIM_ProductProductID",
+									"name": "DIM_ProductProductKey",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "CustomerID",
 									"type": "Int32",
-									"physicalType": "int"
+									"physicalType": "INT32"
+								},
+								"sink": {
+									"name": "DIM_CustomerCustomerKey",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "LocationID",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "DIM_SalesLocation",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "EmployeeID",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "DIM_EmployeeEmployeekey",
+									"type": "String",
+									"physicalType": "varchar"
 								}
 							},
 							{
@@ -100,62 +139,49 @@
 								}
 							},
 							{
+								"source": {
+									"name": "LineTotal",
+									"type": "Double",
+									"physicalType": "DOUBLE"
+								},
 								"sink": {
-									"name": "DIM_CustomerCustomerID",
-									"type": "Int32",
-									"physicalType": "int"
+									"name": "LineTotal",
+									"type": "String",
+									"physicalType": "varchar"
 								}
 							},
 							{
 								"source": {
-									"name": "Employeekey",
-									"type": "String",
-									"physicalType": "UTF8"
+									"name": "UNIT_PRICE",
+									"type": "Double",
+									"physicalType": "DOUBLE"
 								},
 								"sink": {
-									"name": "DIM_SalesLocation",
+									"name": "UnitPrice",
 									"type": "String",
 									"physicalType": "varchar"
 								}
 							},
 							{
+								"source": {
+									"name": "DiscountUnitPrice",
+									"type": "Double",
+									"physicalType": "DOUBLE"
+								},
 								"sink": {
-									"name": "DIM_EmployeeEmployeeID",
-									"type": "Int32",
-									"physicalType": "int"
-								}
-							},
-							{
-								"sink": {
-									"name": "Price",
-									"type": "Int32",
-									"physicalType": "int"
-								}
-							},
-							{
-								"sink": {
-									"name": "Discount",
-									"type": "Int32",
-									"physicalType": "int"
-								}
-							},
-							{
-								"sink": {
-									"name": "DIM_EmployeeEmployeeKkey",
+									"name": "DiscountUnitPrice",
 									"type": "String",
 									"physicalType": "varchar"
 								}
 							},
 							{
+								"source": {
+									"name": "ActualUnitPrice",
+									"type": "Double",
+									"physicalType": "DOUBLE"
+								},
 								"sink": {
-									"name": "DIM_CustomerCustomerKey",
-									"type": "String",
-									"physicalType": "varchar"
-								}
-							},
-							{
-								"sink": {
-									"name": "DIM_ProductProductKey",
+									"name": "ActualUnitPrice",
 									"type": "String",
 									"physicalType": "varchar"
 								}
