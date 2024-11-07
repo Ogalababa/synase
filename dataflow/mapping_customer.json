@@ -1,0 +1,59 @@
+{
+	"name": "mapping_customer",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "dim_go_customer",
+						"type": "DatasetReference"
+					},
+					"name": "goCustomer"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "lsconnection",
+						"type": "LinkedServiceReference"
+					},
+					"name": "dimGoCustomer"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          RETAILER_CODE as integer,",
+				"          RETAILER_CODEMR as integer,",
+				"          COMPANY_NAME as string,",
+				"          RETAILER_TYPE_CODE as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> goCustomer",
+				"goCustomer derive(CustomerKey = concatWS('_', toString(RETAILER_CODE), \"_GO\"),",
+				"          CustomerLocation = 0,",
+				"          Discount = '') ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     fileSystem: 'fsngroup6',",
+				"     folderPath: 'dim_go_customer',",
+				"     truncate: true,",
+				"     compressionCodec: 'none',",
+				"     filePattern:'dim_go_customer_stagging.parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> dimGoCustomer"
+			]
+		}
+	}
+}
