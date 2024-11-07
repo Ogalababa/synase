@@ -134,6 +134,7 @@
 				"     format: 'parquet',",
 				"     fileSystem: 'fsngroup6',",
 				"     folderPath: 'dim_anc_employee',",
+				"     truncate: true,",
 				"     filePattern:'dim_anc_employee_stagging.parquet',",
 				"     umask: 0022,",
 				"     preCommands: [],",
