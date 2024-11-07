@@ -15,6 +15,12 @@
 					"referenceName": "datalake_To_DWH_Dim_Location",
 					"type": "PipelineReference"
 				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "datalake_To_DWH_Dim_employee",
+					"type": "PipelineReference"
+				}
 			}
 		],
 		"type": "ScheduleTrigger",
