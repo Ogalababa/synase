@@ -1,0 +1,47 @@
+{
+	"name": "dwh_go_customer",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DWH",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "CustomerKey",
+				"type": "varchar"
+			},
+			{
+				"name": "CustomerID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "DIM_Customerlocation",
+				"type": "varchar"
+			},
+			{
+				"name": "Name",
+				"type": "varchar"
+			},
+			{
+				"name": "Discount",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Companyname",
+				"type": "varchar"
+			},
+			{
+				"name": "Customeradress",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "DIM_Customer"
+		}
+	}
+}

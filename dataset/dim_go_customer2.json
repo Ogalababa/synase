@@ -1,0 +1,50 @@
+{
+	"name": "dim_go_customer2",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dim_go_customer_stagging-00001.parquet",
+				"folderPath": "dim_go_customer",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "RETAILER_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "RETAILER_CODEMR",
+				"type": "INT32"
+			},
+			{
+				"name": "COMPANY_NAME",
+				"type": "UTF8"
+			},
+			{
+				"name": "RETAILER_TYPE_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "CustomerKey",
+				"type": "UTF8"
+			},
+			{
+				"name": "CustomerLocation",
+				"type": "INT32"
+			},
+			{
+				"name": "Discount",
+				"type": "UTF8"
+			}
+		]
+	}
+}
