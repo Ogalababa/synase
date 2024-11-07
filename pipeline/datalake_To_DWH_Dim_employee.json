@@ -158,7 +158,7 @@
 								"source": {
 									"name": "DATE_HIRED",
 									"type": "DateTime",
-									"physicalType": "INT96"
+									"physicalType": "DATE"
 								},
 								"sink": {
 									"name": "Startdate",
@@ -169,8 +169,8 @@
 							{
 								"source": {
 									"name": "Enddate",
-									"type": "String",
-									"physicalType": "UTF8"
+									"type": "DateTime",
+									"physicalType": "DATE"
 								},
 								"sink": {
 									"name": "Enddate",
@@ -202,7 +202,14 @@
 			{
 				"name": "Copy dim_anc_emplpyee",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Copy dim_go_employee",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -262,7 +269,7 @@
 							},
 							{
 								"source": {
-									"name": "dept_head_id",
+									"name": "dept_id",
 									"type": "Int32",
 									"physicalType": "INT32"
 								},
@@ -324,7 +331,7 @@
 								"source": {
 									"name": "start_date",
 									"type": "DateTime",
-									"physicalType": "INT96"
+									"physicalType": "DATE"
 								},
 								"sink": {
 									"name": "Startdate",
@@ -335,8 +342,8 @@
 							{
 								"source": {
 									"name": "termination_date",
-									"type": "String",
-									"physicalType": "UTF8"
+									"type": "DateTime",
+									"physicalType": "DATE"
 								},
 								"sink": {
 									"name": "Enddate",
