@@ -231,8 +231,8 @@
 										},
 										"sink": {
 											"name": "Employeestatus",
-											"type": "Int32",
-											"physicalType": "int"
+											"type": "String",
+											"physicalType": "varchar"
 										}
 									},
 									{
@@ -409,8 +409,8 @@
 										},
 										"sink": {
 											"name": "Employeestatus",
-											"type": "Int32",
-											"physicalType": "int"
+											"type": "String",
+											"physicalType": "varchar"
 										}
 									},
 									{
