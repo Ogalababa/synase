@@ -282,7 +282,14 @@
 			{
 				"name": "Copy anc employee",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Copy anc customer location",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -330,7 +337,7 @@
 							},
 							{
 								"source": {
-									"name": "ADDRESS1",
+									"name": "street",
 									"type": "String",
 									"physicalType": "UTF8"
 								},
@@ -342,7 +349,7 @@
 							},
 							{
 								"source": {
-									"name": "CITY",
+									"name": "city",
 									"type": "String",
 									"physicalType": "UTF8"
 								},
@@ -354,7 +361,7 @@
 							},
 							{
 								"source": {
-									"name": "COUNTRY",
+									"name": "Country",
 									"type": "String",
 									"physicalType": "UTF8"
 								},
@@ -366,7 +373,7 @@
 							},
 							{
 								"source": {
-									"name": "REGION",
+									"name": "state",
 									"type": "String",
 									"physicalType": "UTF8"
 								},
