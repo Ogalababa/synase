@@ -1,0 +1,116 @@
+{
+	"name": "dim_anc_employee",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dim_anc_employee_stagging-00001.parquet",
+				"folderPath": "dim_anc_employee",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "emp_id",
+				"type": "INT32"
+			},
+			{
+				"name": "manager_id",
+				"type": "INT32"
+			},
+			{
+				"name": "emp_fname",
+				"type": "UTF8"
+			},
+			{
+				"name": "emp_lname",
+				"type": "UTF8"
+			},
+			{
+				"name": "dept_id",
+				"type": "INT32"
+			},
+			{
+				"name": "street",
+				"type": "UTF8"
+			},
+			{
+				"name": "city",
+				"type": "UTF8"
+			},
+			{
+				"name": "state",
+				"type": "UTF8"
+			},
+			{
+				"name": "zip_code",
+				"type": "UTF8"
+			},
+			{
+				"name": "phone",
+				"type": "UTF8"
+			},
+			{
+				"name": "status",
+				"type": "UTF8"
+			},
+			{
+				"name": "ss_number",
+				"type": "UTF8"
+			},
+			{
+				"name": "salary",
+				"type": "DECIMAL",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "start_date",
+				"type": "INT96"
+			},
+			{
+				"name": "termination_date",
+				"type": "UTF8"
+			},
+			{
+				"name": "birth_date",
+				"type": "INT96"
+			},
+			{
+				"name": "bene_health_ins",
+				"type": "UTF8"
+			},
+			{
+				"name": "bene_life_ins",
+				"type": "UTF8"
+			},
+			{
+				"name": "bene_day_care",
+				"type": "UTF8"
+			},
+			{
+				"name": "sex",
+				"type": "UTF8"
+			},
+			{
+				"name": "dept_name",
+				"type": "UTF8"
+			},
+			{
+				"name": "dept_head_id",
+				"type": "INT32"
+			},
+			{
+				"name": "EmployeeKey",
+				"type": "UTF8"
+			}
+		]
+	}
+}
