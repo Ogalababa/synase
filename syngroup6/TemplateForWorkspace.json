@@ -105,7 +105,7 @@
 						}
 					},
 					{
-						"name": "Copy data1",
+						"name": "Copy dim_go_employee",
 						"type": "Copy",
 						"dependsOn": [
 							{
@@ -124,8 +124,341 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"enableStaging": false
-						}
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"Employeekey"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "EmployeeKey",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Employeekey",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "SALES_STAFF_CODE",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "EployeeID",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "SALES_BRANCH_CODE",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "DepartmentID",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "FIRST_NAME",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Firstname",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "LAST_NAME",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Lastname",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Department",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Department",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Employeestatus",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Employeestatus",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "DATE_HIRED",
+											"type": "DateTime",
+											"physicalType": "DATE"
+										},
+										"sink": {
+											"name": "Startdate",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "Enddate",
+											"type": "DateTime",
+											"physicalType": "DATE"
+										},
+										"sink": {
+											"name": "Enddate",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "dim_go_employee",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "dwh_dim_employee_go",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Copy dim_anc_emplpyee",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Copy dim_go_employee",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"Employeekey"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "EmployeeKey",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Employeekey",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "emp_id",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "EployeeID",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "dept_id",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "DepartmentID",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "emp_fname",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Firstname",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "emp_lname",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Lastname",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "dept_name",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Department",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "status",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Employeestatus",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "start_date",
+											"type": "DateTime",
+											"physicalType": "DATE"
+										},
+										"sink": {
+											"name": "Startdate",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "termination_date",
+											"type": "DateTime",
+											"physicalType": "DATE"
+										},
+										"sink": {
+											"name": "Enddate",
+											"type": "DateTime",
+											"physicalType": "date"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "dim_anc_employee",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "dwh_anc_employee",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
 					}
 				],
 				"policy": {
@@ -135,7 +468,10 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/dim_employee')]",
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+				"[concat(variables('workspaceId'), '/datasets/dim_go_employee')]",
+				"[concat(variables('workspaceId'), '/datasets/dwh_dim_employee_go')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_anc_employee')]",
+				"[concat(variables('workspaceId'), '/datasets/dwh_anc_employee')]"
 			]
 		},
 		{
@@ -1885,6 +2221,127 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/dim_anc_employee')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dim_anc_employee_stagging-00001.parquet",
+						"folderPath": "dim_anc_employee",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "emp_id",
+						"type": "INT32"
+					},
+					{
+						"name": "manager_id",
+						"type": "INT32"
+					},
+					{
+						"name": "emp_fname",
+						"type": "UTF8"
+					},
+					{
+						"name": "emp_lname",
+						"type": "UTF8"
+					},
+					{
+						"name": "dept_id",
+						"type": "INT32"
+					},
+					{
+						"name": "street",
+						"type": "UTF8"
+					},
+					{
+						"name": "city",
+						"type": "UTF8"
+					},
+					{
+						"name": "state",
+						"type": "UTF8"
+					},
+					{
+						"name": "zip_code",
+						"type": "UTF8"
+					},
+					{
+						"name": "phone",
+						"type": "UTF8"
+					},
+					{
+						"name": "status",
+						"type": "UTF8"
+					},
+					{
+						"name": "ss_number",
+						"type": "UTF8"
+					},
+					{
+						"name": "salary",
+						"type": "DECIMAL",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "start_date",
+						"type": "INT96"
+					},
+					{
+						"name": "termination_date",
+						"type": "UTF8"
+					},
+					{
+						"name": "birth_date",
+						"type": "INT96"
+					},
+					{
+						"name": "bene_health_ins",
+						"type": "UTF8"
+					},
+					{
+						"name": "bene_life_ins",
+						"type": "UTF8"
+					},
+					{
+						"name": "bene_day_care",
+						"type": "UTF8"
+					},
+					{
+						"name": "sex",
+						"type": "UTF8"
+					},
+					{
+						"name": "dept_name",
+						"type": "UTF8"
+					},
+					{
+						"name": "dept_head_id",
+						"type": "INT32"
+					},
+					{
+						"name": "EmployeeKey",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/dim_anc_product')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -1954,6 +2411,93 @@
 					{
 						"name": "ProductID",
 						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dim_go_employee')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dim_go_employee_stagging-00001.parquet",
+						"folderPath": "dim_goEmployee",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "SALES_STAFF_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "FIRST_NAME",
+						"type": "UTF8"
+					},
+					{
+						"name": "LAST_NAME",
+						"type": "UTF8"
+					},
+					{
+						"name": "POSITION_EN",
+						"type": "UTF8"
+					},
+					{
+						"name": "WORK_PHONE",
+						"type": "UTF8"
+					},
+					{
+						"name": "EXTENSION",
+						"type": "UTF8"
+					},
+					{
+						"name": "FAX",
+						"type": "UTF8"
+					},
+					{
+						"name": "EMAIL",
+						"type": "UTF8"
+					},
+					{
+						"name": "DATE_HIRED",
+						"type": "INT96"
+					},
+					{
+						"name": "SALES_BRANCH_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "MANAGER_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "EmployeeKey",
+						"type": "UTF8"
+					},
+					{
+						"name": "Department",
+						"type": "UTF8"
+					},
+					{
+						"name": "Employeestatus",
+						"type": "UTF8"
+					},
+					{
+						"name": "Enddate",
+						"type": "UTF8"
 					}
 				]
 			},
@@ -2140,6 +2684,128 @@
 				"typeProperties": {
 					"schema": "dbo",
 					"table": "Dim_Product"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/DWH')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dwh_anc_employee')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Employeekey",
+						"type": "varchar"
+					},
+					{
+						"name": "EployeeID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "DepartmentID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Firstname",
+						"type": "varchar"
+					},
+					{
+						"name": "Lastname",
+						"type": "varchar"
+					},
+					{
+						"name": "Department",
+						"type": "varchar"
+					},
+					{
+						"name": "Employeestatus",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Startdate",
+						"type": "date"
+					},
+					{
+						"name": "Enddate",
+						"type": "date"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "DIM_Employee"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/DWH')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dwh_dim_employee_go')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "Employeekey",
+						"type": "varchar"
+					},
+					{
+						"name": "EployeeID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "DepartmentID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Firstname",
+						"type": "varchar"
+					},
+					{
+						"name": "Lastname",
+						"type": "varchar"
+					},
+					{
+						"name": "Department",
+						"type": "varchar"
+					},
+					{
+						"name": "Employeestatus",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Startdate",
+						"type": "date"
+					},
+					{
+						"name": "Enddate",
+						"type": "date"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "DIM_Employee"
 				}
 			},
 			"dependsOn": [
@@ -2631,13 +3297,16 @@
 						"go derive(EmployeeKey = concatWS(\"_\", toString(SALES_STAFF_CODE), \"GO\"),",
 						"          Department = '',",
 						"          Employeestatus = '',",
-						"          Enddate = '') ~> derivedColumn1",
+						"          Enddate = toDate(''),",
+						"          DATE_HIRED = toDate(DATE_HIRED)) ~> derivedColumn1",
 						"anc, ancDepartment join(anc@dept_id == ancDepartment@dept_id,",
 						"     joinType:'left',",
 						"     matchType:'exact',",
 						"     ignoreSpaces: false,",
 						"     broadcast: 'auto')~> mappingANC",
-						"mappingANC derive(EmployeeKey = concatWS('_', toString(emp_id), '_ANC')) ~> derivedColumn2",
+						"mappingANC derive(EmployeeKey = concatWS('_', toString(emp_id), '_ANC'),",
+						"          start_date = toDate(start_date),",
+						"          termination_date = toDate(termination_date)) ~> derivedColumn2",
 						"derivedColumn1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
@@ -2656,6 +3325,7 @@
 						"     format: 'parquet',",
 						"     fileSystem: 'fsngroup6',",
 						"     folderPath: 'dim_anc_employee',",
+						"     truncate: true,",
 						"     filePattern:'dim_anc_employee_stagging.parquet',",
 						"     umask: 0022,",
 						"     preCommands: [],",
