@@ -9,6 +9,12 @@
 					"referenceName": "sourceTdatalake_godb",
 					"type": "PipelineReference"
 				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "sourceTdatalake_anc",
+					"type": "PipelineReference"
+				}
 			}
 		],
 		"type": "ScheduleTrigger",
