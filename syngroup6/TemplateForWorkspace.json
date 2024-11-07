@@ -66,6 +66,52 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('workspaceName'), '/datalake_To_DWH_Dim_Customer')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "mapping customer",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "mapping_customer",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"goCustomer": {},
+									"dimGoCustomer": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/mapping_customer')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/datalake_To_DWH_Dim_Location')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
@@ -74,6 +120,8 @@
 					{
 						"name": "mapping_dim_Location",
 						"type": "ExecuteDataFlow",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -2845,6 +2893,49 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/dim_go_customer')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dbo.go_RETAILER.parquet",
+						"folderPath": "GO",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "RETAILER_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "RETAILER_CODEMR",
+						"type": "INT32"
+					},
+					{
+						"name": "COMPANY_NAME",
+						"type": "UTF8"
+					},
+					{
+						"name": "RETAILER_TYPE_CODE",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/dim_go_employee')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -3756,6 +3847,98 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/Trigger go db')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "sourceTdatalake_godb",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "sourceTdatalake_anc",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "sourceTdatalake_achrm",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Hour",
+						"interval": 24,
+						"startTime": "2024-11-07T03:05:00",
+						"timeZone": "W. Europe Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/sourceTdatalake_godb')]",
+				"[concat(variables('workspaceId'), '/pipelines/sourceTdatalake_anc')]",
+				"[concat(variables('workspaceId'), '/pipelines/sourceTdatalake_achrm')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Trigger to dwh')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "datalake_To_DWH_Dim_product",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "datalake_To_DWH_Dim_Location",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "datalake_To_DWH_Dim_employee",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 24,
+						"startTime": "2024-11-07T04:08:00",
+						"timeZone": "W. Europe Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/datalake_To_DWH_Dim_product')]",
+				"[concat(variables('workspaceId'), '/pipelines/datalake_To_DWH_Dim_Location')]",
+				"[concat(variables('workspaceId'), '/pipelines/datalake_To_DWH_Dim_employee')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
 			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
 			"apiVersion": "2019-06-01-preview",
@@ -4230,6 +4413,71 @@
 				"[concat(variables('workspaceId'), '/datasets/go_sales_branch')]",
 				"[concat(variables('workspaceId'), '/datasets/Country')]",
 				"[concat(variables('workspaceId'), '/datasets/anc_customer')]",
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/mapping_customer')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "dim_go_customer",
+								"type": "DatasetReference"
+							},
+							"name": "goCustomer"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "lsconnection",
+								"type": "LinkedServiceReference"
+							},
+							"name": "dimGoCustomer"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          RETAILER_CODE as integer,",
+						"          RETAILER_CODEMR as integer,",
+						"          COMPANY_NAME as string,",
+						"          RETAILER_TYPE_CODE as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> goCustomer",
+						"goCustomer derive(CustomerKey = concatWS('_', toString(RETAILER_CODE), \"_GO\"),",
+						"          CustomerLocation = 0,",
+						"          Discount = '') ~> derivedColumn1",
+						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     fileSystem: 'fsngroup6',",
+						"     folderPath: 'dim_go_customer',",
+						"     truncate: true,",
+						"     compressionCodec: 'none',",
+						"     filePattern:'dim_go_customer_stagging.parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> dimGoCustomer"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/dim_go_customer')]",
 				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
 			]
 		},
