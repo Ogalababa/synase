@@ -1,0 +1,56 @@
+{
+	"name": "dwh_dim_employee_go",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DWH",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "Employeekey",
+				"type": "varchar"
+			},
+			{
+				"name": "EployeeID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "DepartmentID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Firstname",
+				"type": "varchar"
+			},
+			{
+				"name": "Lastname",
+				"type": "varchar"
+			},
+			{
+				"name": "Department",
+				"type": "varchar"
+			},
+			{
+				"name": "Employeestatus",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Startdate",
+				"type": "date"
+			},
+			{
+				"name": "Enddate",
+				"type": "date"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "DIM_Employee"
+		}
+	}
+}

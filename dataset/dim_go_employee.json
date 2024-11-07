@@ -1,0 +1,82 @@
+{
+	"name": "dim_go_employee",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dim_go_employee_stagging-00001.parquet",
+				"folderPath": "dim_goEmployee",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "SALES_STAFF_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "FIRST_NAME",
+				"type": "UTF8"
+			},
+			{
+				"name": "LAST_NAME",
+				"type": "UTF8"
+			},
+			{
+				"name": "POSITION_EN",
+				"type": "UTF8"
+			},
+			{
+				"name": "WORK_PHONE",
+				"type": "UTF8"
+			},
+			{
+				"name": "EXTENSION",
+				"type": "UTF8"
+			},
+			{
+				"name": "FAX",
+				"type": "UTF8"
+			},
+			{
+				"name": "EMAIL",
+				"type": "UTF8"
+			},
+			{
+				"name": "DATE_HIRED",
+				"type": "INT96"
+			},
+			{
+				"name": "SALES_BRANCH_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "MANAGER_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "EmployeeKey",
+				"type": "UTF8"
+			},
+			{
+				"name": "Department",
+				"type": "UTF8"
+			},
+			{
+				"name": "Employeestatus",
+				"type": "UTF8"
+			},
+			{
+				"name": "Enddate",
+				"type": "UTF8"
+			}
+		]
+	}
+}
