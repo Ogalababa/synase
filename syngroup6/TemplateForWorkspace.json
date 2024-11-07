@@ -94,10 +94,8 @@
 									"goSalesBranch": {},
 									"country": {},
 									"ancCustomer": {},
-									"ancEmployee": {},
 									"dimGoLocation": {},
-									"dimAncCustomer": {},
-									"dimANCEmployee": {}
+									"dimAncCustomer": {}
 								}
 							},
 							"staging": {},
@@ -107,6 +105,396 @@
 							},
 							"traceLevel": "Fine"
 						}
+					},
+					{
+						"name": "Copy go location",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "mapping_dim_Location",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"LocationID"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "LocationID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "LocationID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ADDRESS1",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Adress",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CITY",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "City",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "COUNTRY",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Country",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "REGION",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "State",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "dim_go_location",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "dwh_dim_location",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Copy anc customer location",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Copy go location",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"LocationID"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "LocationID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "LocationID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "address",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Adress",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "city",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "City",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Country",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Country",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "state",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "State",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "dim_anc_cus",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "dwh_dim_location",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Copy anc employee",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Copy anc customer location",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"LocationID"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "LocationID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "LocationID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "street",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Adress",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "city",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "City",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Country",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Country",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "state",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "State",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "dim_anc_employee",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "dwh_dim_location",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
 					}
 				],
 				"policy": {
@@ -117,7 +505,10 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/mapping_country')]",
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+				"[concat(variables('workspaceId'), '/datasets/dim_go_location')]",
+				"[concat(variables('workspaceId'), '/datasets/dwh_dim_location')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_anc_cus')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_anc_employee')]"
 			]
 		},
 		{
@@ -129,8 +520,6 @@
 					{
 						"name": "mappingDimEmployee",
 						"type": "ExecuteDataFlow",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -2171,6 +2560,93 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/dim_anc_cus')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dim_anc_Cus_location_stagging-00001.parquet",
+						"folderPath": "dimAncCustomer",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "id",
+						"type": "INT32"
+					},
+					{
+						"name": "fname",
+						"type": "UTF8"
+					},
+					{
+						"name": "lname",
+						"type": "UTF8"
+					},
+					{
+						"name": "address",
+						"type": "UTF8"
+					},
+					{
+						"name": "city",
+						"type": "UTF8"
+					},
+					{
+						"name": "state",
+						"type": "UTF8"
+					},
+					{
+						"name": "zip",
+						"type": "UTF8"
+					},
+					{
+						"name": "phone",
+						"type": "UTF8"
+					},
+					{
+						"name": "company_name",
+						"type": "UTF8"
+					},
+					{
+						"name": "type",
+						"type": "UTF8"
+					},
+					{
+						"name": "discount",
+						"type": "INT32"
+					},
+					{
+						"name": "max_quantity_order",
+						"type": "INT32"
+					},
+					{
+						"name": "LocationID",
+						"type": "UTF8"
+					},
+					{
+						"name": "Adress2",
+						"type": "UTF8"
+					},
+					{
+						"name": "Country",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/dim_anc_employee')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -2447,6 +2923,73 @@
 					},
 					{
 						"name": "Enddate",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dim_go_location')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dim_go_location_stagging-00001.parquet",
+						"folderPath": "dim_go_location",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "SALES_BRANCH_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "ADDRESS1",
+						"type": "UTF8"
+					},
+					{
+						"name": "ADDRESS2",
+						"type": "UTF8"
+					},
+					{
+						"name": "CITY",
+						"type": "UTF8"
+					},
+					{
+						"name": "REGION",
+						"type": "UTF8"
+					},
+					{
+						"name": "POSTAL_ZONE",
+						"type": "UTF8"
+					},
+					{
+						"name": "COUNTRY_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "COUNTRY",
+						"type": "UTF8"
+					},
+					{
+						"name": "LANGUAGE",
+						"type": "UTF8"
+					},
+					{
+						"name": "LocationID",
 						"type": "UTF8"
 					}
 				]
@@ -2756,6 +3299,48 @@
 				"typeProperties": {
 					"schema": "dbo",
 					"table": "DIM_Employee"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/DWH')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dwh_dim_location')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "LocationID",
+						"type": "varchar"
+					},
+					{
+						"name": "Adress",
+						"type": "varchar"
+					},
+					{
+						"name": "City",
+						"type": "varchar"
+					},
+					{
+						"name": "Country",
+						"type": "varchar"
+					},
+					{
+						"name": "State",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "DIM_Location"
 				}
 			},
 			"dependsOn": [
@@ -3311,7 +3896,9 @@
 						"     broadcast: 'auto')~> mappingANC",
 						"mappingANC derive(EmployeeKey = concatWS('_', toString(emp_id), '_ANC'),",
 						"          start_date = toDate(start_date),",
-						"          termination_date = toDate(termination_date)) ~> derivedColumn2",
+						"          termination_date = toDate(termination_date),",
+						"          LocationID = concatWS('_', toString(emp_id), '_ANC_EMPLOYEE'),",
+						"          Country = '') ~> derivedColumn2",
 						"derivedColumn1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
@@ -3529,13 +4116,6 @@
 								"type": "DatasetReference"
 							},
 							"name": "ancCustomer"
-						},
-						{
-							"dataset": {
-								"referenceName": "anc_employee",
-								"type": "DatasetReference"
-							},
-							"name": "ancEmployee"
 						}
 					],
 					"sinks": [
@@ -3552,13 +4132,6 @@
 								"type": "LinkedServiceReference"
 							},
 							"name": "dimAncCustomer"
-						},
-						{
-							"linkedService": {
-								"referenceName": "lsconnection",
-								"type": "LinkedServiceReference"
-							},
-							"name": "dimANCEmployee"
 						}
 					],
 					"transformations": [
@@ -3570,9 +4143,6 @@
 						},
 						{
 							"name": "mappingANCcustomer"
-						},
-						{
-							"name": "mappingANCEmplpyee"
 						}
 					],
 					"scriptLines": [
@@ -3619,32 +4189,6 @@
 						"     validateSchema: false,",
 						"     ignoreNoFilesFound: false,",
 						"     format: 'parquet') ~> ancCustomer",
-						"source(output(",
-						"          emp_id as integer,",
-						"          manager_id as integer,",
-						"          emp_fname as string,",
-						"          emp_lname as string,",
-						"          dept_id as integer,",
-						"          street as string,",
-						"          city as string,",
-						"          state as string,",
-						"          zip_code as string,",
-						"          phone as string,",
-						"          status as string,",
-						"          ss_number as string,",
-						"          salary as decimal(18,0),",
-						"          start_date as timestamp,",
-						"          termination_date as string,",
-						"          birth_date as timestamp,",
-						"          bene_health_ins as string,",
-						"          bene_life_ins as string,",
-						"          bene_day_care as string,",
-						"          sex as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false,",
-						"     format: 'parquet') ~> ancEmployee",
 						"goSalesBranch, country join(goSalesBranch@COUNTRY_CODE == country@COUNTRY_CODE,",
 						"     joinType:'left',",
 						"     matchType:'exact',",
@@ -3654,9 +4198,6 @@
 						"ancCustomer derive(LocationID = concatWS('_', toString(id), '_ANC_CUSTOMER'),",
 						"          Adress2 = '',",
 						"          Country = '') ~> mappingANCcustomer",
-						"ancEmployee derive(LocationID = concatWS('_', toString(emp_id), '_ANC_EMPLOYEE'),",
-						"          Adress2 = '',",
-						"          Country = '') ~> mappingANCEmplpyee",
 						"mappingDimLoacation sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
@@ -3681,20 +4222,7 @@
 						"     preCommands: [],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> dimAncCustomer",
-						"mappingANCEmplpyee sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     format: 'parquet',",
-						"     fileSystem: 'fsngroup6',",
-						"     folderPath: 'dimANCEmplpyee',",
-						"     truncate: true,",
-						"     compressionCodec: 'none',",
-						"     filePattern:'dim_anc_emp_location_stagging.parquet',",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> dimANCEmployee"
+						"     skipDuplicateMapOutputs: true) ~> dimAncCustomer"
 					]
 				}
 			},
@@ -3702,7 +4230,6 @@
 				"[concat(variables('workspaceId'), '/datasets/go_sales_branch')]",
 				"[concat(variables('workspaceId'), '/datasets/Country')]",
 				"[concat(variables('workspaceId'), '/datasets/anc_customer')]",
-				"[concat(variables('workspaceId'), '/datasets/anc_employee')]",
 				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
 			]
 		},
