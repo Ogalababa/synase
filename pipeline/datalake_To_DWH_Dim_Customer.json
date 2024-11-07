@@ -29,8 +29,6 @@
 			{
 				"name": "Copy go customer",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "mapping customer",
@@ -101,9 +99,9 @@
 							},
 							{
 								"source": {
-									"name": "CustomerLocation",
-									"type": "Int32",
-									"physicalType": "INT32"
+									"name": "LocationID",
+									"type": "String",
+									"physicalType": "UTF8"
 								},
 								"sink": {
 									"name": "DIM_Customerlocation",
@@ -113,7 +111,7 @@
 							},
 							{
 								"source": {
-									"name": "COMPANY_NAME",
+									"name": "Name",
 									"type": "String",
 									"physicalType": "UTF8"
 								},
@@ -146,15 +144,143 @@
 									"type": "String",
 									"physicalType": "varchar"
 								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "dim_go_customer2",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "dwh_go_customer",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Copy ANC customer",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy go customer",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ParquetSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "ParquetReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "upsert",
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"CustomerKey"
+							]
+						},
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "CustomerKey",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "CustomerKey",
+									"type": "String",
+									"physicalType": "varchar"
+								}
 							},
 							{
 								"source": {
-									"name": "CustomerLocation",
+									"name": "id",
 									"type": "Int32",
 									"physicalType": "INT32"
 								},
 								"sink": {
-									"name": "Customeradress",
+									"name": "CustomerID",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "LocationID",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "DIM_Customerlocation",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "fname",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "Name",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "discount",
+									"type": "Int32",
+									"physicalType": "INT32"
+								},
+								"sink": {
+									"name": "Discount",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "company_name",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "Companyname",
 									"type": "String",
 									"physicalType": "varchar"
 								}
@@ -169,7 +295,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "dim_go_customer2",
+						"referenceName": "dim_ANC_customer2",
 						"type": "DatasetReference"
 					}
 				],

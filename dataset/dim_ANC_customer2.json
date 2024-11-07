@@ -1,0 +1,94 @@
+{
+	"name": "dim_ANC_customer2",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dim_ANC_customer_stagging-00001.parquet",
+				"folderPath": "dim_ANC_customer",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "id",
+				"type": "INT32"
+			},
+			{
+				"name": "fname",
+				"type": "UTF8"
+			},
+			{
+				"name": "lname",
+				"type": "UTF8"
+			},
+			{
+				"name": "address",
+				"type": "UTF8"
+			},
+			{
+				"name": "city",
+				"type": "UTF8"
+			},
+			{
+				"name": "state",
+				"type": "UTF8"
+			},
+			{
+				"name": "zip",
+				"type": "UTF8"
+			},
+			{
+				"name": "phone",
+				"type": "UTF8"
+			},
+			{
+				"name": "company_name",
+				"type": "UTF8"
+			},
+			{
+				"name": "type",
+				"type": "UTF8"
+			},
+			{
+				"name": "discount",
+				"type": "INT32"
+			},
+			{
+				"name": "max_quantity_order",
+				"type": "INT32"
+			},
+			{
+				"name": "CustomerKey",
+				"type": "UTF8"
+			},
+			{
+				"name": "LocationID",
+				"type": "UTF8"
+			},
+			{
+				"name": "Adress",
+				"type": "UTF8"
+			},
+			{
+				"name": "City",
+				"type": "UTF8"
+			},
+			{
+				"name": "Country",
+				"type": "UTF8"
+			},
+			{
+				"name": "State",
+				"type": "UTF8"
+			}
+		]
+	}
+}
