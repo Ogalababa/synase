@@ -116,7 +116,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> mappingANC",
-				"mappingANC derive(EmployeeKey = concatWS('_', toString(emp_id), '_ANC'),",
+				"mappingANC derive(EmployeeKey = concatWS('_', toString(emp_id), 'ANC'),",
 				"          start_date = toDate(start_date),",
 				"          termination_date = toDate(termination_date),",
 				"          LocationID = concatWS('_', toString(emp_id), '_ANC_EMPLOYEE'),",
