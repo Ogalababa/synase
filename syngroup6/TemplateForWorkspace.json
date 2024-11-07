@@ -107,8 +107,6 @@
 					{
 						"name": "Copy go customer",
 						"type": "Copy",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "mapping customer",
@@ -166,7 +164,11 @@
 										}
 									},
 									{
-										"source": {},
+										"source": {
+											"name": "RETAILER_CODE",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
 										"sink": {
 											"name": "CustomerID",
 											"type": "Int32",
@@ -174,7 +176,11 @@
 										}
 									},
 									{
-										"source": {},
+										"source": {
+											"name": "LocationID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
 										"sink": {
 											"name": "DIM_Customerlocation",
 											"type": "String",
@@ -182,7 +188,11 @@
 										}
 									},
 									{
-										"source": {},
+										"source": {
+											"name": "Name",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
 										"sink": {
 											"name": "Name",
 											"type": "String",
@@ -202,7 +212,11 @@
 										}
 									},
 									{
-										"source": {},
+										"source": {
+											"name": "COMPANY_NAME",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
 										"sink": {
 											"name": "Companyname",
 											"type": "String",
@@ -231,6 +245,148 @@
 								"parameters": {}
 							}
 						]
+					},
+					{
+						"name": "Copy ANC customer",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Copy go customer",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"CustomerKey"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "CustomerKey",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "CustomerKey",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "id",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "CustomerID",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "LocationID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "DIM_Customerlocation",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "fname",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Name",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "discount",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "Discount",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "company_name",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Companyname",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "dim_ANC_customer2",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "dwh_go_customer",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
 					}
 				],
 				"policy": {
@@ -241,7 +397,8 @@
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/mapping_customer')]",
 				"[concat(variables('workspaceId'), '/datasets/dim_go_customer2')]",
-				"[concat(variables('workspaceId'), '/datasets/dwh_go_customer')]"
+				"[concat(variables('workspaceId'), '/datasets/dwh_go_customer')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_ANC_customer2')]"
 			]
 		},
 		{
@@ -2737,7 +2894,193 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/dim_ANC_customer2')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dim_ANC_customer_stagging-00001.parquet",
+						"folderPath": "dim_ANC_customer",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "id",
+						"type": "INT32"
+					},
+					{
+						"name": "fname",
+						"type": "UTF8"
+					},
+					{
+						"name": "lname",
+						"type": "UTF8"
+					},
+					{
+						"name": "address",
+						"type": "UTF8"
+					},
+					{
+						"name": "city",
+						"type": "UTF8"
+					},
+					{
+						"name": "state",
+						"type": "UTF8"
+					},
+					{
+						"name": "zip",
+						"type": "UTF8"
+					},
+					{
+						"name": "phone",
+						"type": "UTF8"
+					},
+					{
+						"name": "company_name",
+						"type": "UTF8"
+					},
+					{
+						"name": "type",
+						"type": "UTF8"
+					},
+					{
+						"name": "discount",
+						"type": "INT32"
+					},
+					{
+						"name": "max_quantity_order",
+						"type": "INT32"
+					},
+					{
+						"name": "CustomerKey",
+						"type": "UTF8"
+					},
+					{
+						"name": "LocationID",
+						"type": "UTF8"
+					},
+					{
+						"name": "Adress",
+						"type": "UTF8"
+					},
+					{
+						"name": "City",
+						"type": "UTF8"
+					},
+					{
+						"name": "Country",
+						"type": "UTF8"
+					},
+					{
+						"name": "State",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/dim_anc_cus')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dim_anc_Cus_location_stagging-00001.parquet",
+						"folderPath": "dimAncCustomer",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "id",
+						"type": "INT32"
+					},
+					{
+						"name": "fname",
+						"type": "UTF8"
+					},
+					{
+						"name": "lname",
+						"type": "UTF8"
+					},
+					{
+						"name": "address",
+						"type": "UTF8"
+					},
+					{
+						"name": "city",
+						"type": "UTF8"
+					},
+					{
+						"name": "state",
+						"type": "UTF8"
+					},
+					{
+						"name": "zip",
+						"type": "UTF8"
+					},
+					{
+						"name": "phone",
+						"type": "UTF8"
+					},
+					{
+						"name": "company_name",
+						"type": "UTF8"
+					},
+					{
+						"name": "type",
+						"type": "UTF8"
+					},
+					{
+						"name": "discount",
+						"type": "INT32"
+					},
+					{
+						"name": "max_quantity_order",
+						"type": "INT32"
+					},
+					{
+						"name": "LocationID",
+						"type": "UTF8"
+					},
+					{
+						"name": "Adress2",
+						"type": "UTF8"
+					},
+					{
+						"name": "Country",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dim_anc_customer')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -4797,7 +5140,8 @@
 						"     format: 'parquet') ~> source2",
 						"goCustomer derive(CustomerKey = concatWS('_', toString(RETAILER_CODE), \"_GO\"),",
 						"          CustomerLocation = concatWS('_', toString(RETAILER_CODE), \"_GO\"),",
-						"          Discount = '') ~> derivedColumn1",
+						"          Discount = '',",
+						"          Name = '') ~> derivedColumn1",
 						"source1, derivedColumn1 join(LocationID == CustomerLocation,",
 						"     joinType:'inner',",
 						"     matchType:'exact',",
@@ -4852,6 +5196,18 @@
 			"properties": {
 				"type": "ManagedIdentity",
 				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Pipeline 1')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
 			},
 			"dependsOn": []
 		}
