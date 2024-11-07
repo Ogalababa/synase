@@ -1,0 +1,2939 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "syngroup6"
+		},
+		"AzureTableStorageGo_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureTableStorageGo'"
+		},
+		"DWH_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'DWH'"
+		},
+		"lsconnection_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'lsconnection'"
+		},
+		"sourcedb_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'sourcedb'"
+		},
+		"syngroup6-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'syngroup6-WorkspaceDefaultSqlServer'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:syngroup6.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"DWH_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "se5group6.database.windows.net"
+		},
+		"DWH_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "Se5A7CGroup6"
+		},
+		"DWH_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "anton"
+		},
+		"lsconnection_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://dlsagroup6.dfs.core.windows.net/"
+		},
+		"sourcedb_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "se5group6.database.windows.net"
+		},
+		"sourcedb_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "Se5GoGroup6"
+		},
+		"sourcedb_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "anton"
+		},
+		"syngroup6-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://dlsagroup6.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/datalake_To_DWH_Dim_employee')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "mappingDimEmployee",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dim_employee",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"go": {},
+									"anc": {},
+									"ancDepartment": {},
+									"GoDimEmployee": {},
+									"ANCDimEmployee": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "mappingDimEmployee",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"enableStaging": false
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/dim_employee')]",
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/datalake_To_DWH_Dim_product')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "mapping_Dim_product",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "go_Product",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"go": {},
+									"goProductType": {},
+									"ancProduct": {},
+									"goProduct": {},
+									"dimAncProduct": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "to_dwh_dim_product_go",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "mapping_Dim_product",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"ProductKey"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "ProductKey",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "ProductKey",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ProductID",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "ProductID",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "PRODUCT_NAME",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Productname",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "PRODUCT_TYPE_CODE",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "Producttype",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "PRODUCTION_COST",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										},
+										"sink": {
+											"name": "Productioncost",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "PRODUCT_NUMBER",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "Productcode",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "PRODUCT_TYPE_EN",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Productcatagory",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "productdescription"
+										},
+										"sink": {
+											"name": "Productdescription",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "dim_go_product",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "dim_product_go",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "to_dwh_dim_product_anc_copy",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "to_dwh_dim_product_go",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"ProductKey"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "ProductKey",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "ProductKey",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ProductID",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "ProductID",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "name",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Productname",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Producttype"
+										},
+										"sink": {
+											"name": "Producttype",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "productioncost"
+										},
+										"sink": {
+											"name": "Productioncost",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "id",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "Productcode",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "category",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Productcatagory",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "description",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Productdescription",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "dim_anc_product",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "dim_product_anc",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-11-06T16:53:02Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/go_Product')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_go_product')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_product_go')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_anc_product')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_product_anc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/datalake_To_DWH_verkoop')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "go_to_dwh_location",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "mapping_country_code",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"LocationID",
+										"Source"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "SALES_BRANCH_CODE",
+											"type": "INT32"
+										},
+										"sink": {
+											"name": "LocationID",
+											"type": "int",
+											"precision": 10
+										}
+									},
+									{
+										"source": {
+											"name": "COUNTRY",
+											"type": "UTF8"
+										},
+										"sink": {
+											"name": "Country",
+											"type": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "REGION",
+											"type": "UTF8"
+										},
+										"sink": {
+											"name": "State",
+											"type": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CITY",
+											"type": "UTF8"
+										},
+										"sink": {
+											"name": "City",
+											"type": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "Source",
+											"type": "UTF8"
+										},
+										"sink": {
+											"name": "Source",
+											"type": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ADDRESS1",
+											"type": "UTF8"
+										},
+										"sink": {
+											"name": "Address",
+											"type": "nvarchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "codeCountry",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "dwh_verkopen",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "mapping_country_code",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "mapping_country",
+								"type": "DataFlowReference",
+								"parameters": {
+									"go": "'go'"
+								},
+								"datasetParameters": {
+									"code": {},
+									"counrty": {},
+									"codeCounrty": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-11-06T14:14:15Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/codeCountry')]",
+				"[concat(variables('workspaceId'), '/datasets/dwh_verkopen')]",
+				"[concat(variables('workspaceId'), '/dataflows/mapping_country')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sourceTdatalake_achrm')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "ForEach_qyl",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@pipeline().parameters.cw_items",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy_qyl",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [
+										{
+											"name": "Source",
+											"value": "dbo.@{item().source.table}"
+										},
+										{
+											"name": "Destination",
+											"value": "fsngroup6/ACHRM/@{item().destination.fileName}"
+										}
+									],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": true,
+										"stagingSettings": {
+											"linkedServiceName": {
+												"referenceName": "lsconnection",
+												"type": "LinkedServiceReference"
+											},
+											"path": "fsngroup6/staging/achrm"
+										},
+										"logSettings": {
+											"enableCopyActivityLog": true,
+											"copyActivityLogSettings": {
+												"logLevel": "Warning",
+												"enableReliableLogging": false
+											},
+											"logLocationSettings": {
+												"linkedServiceName": {
+													"referenceName": "lsconnection",
+													"type": "LinkedServiceReference"
+												},
+												"path": "fsngroup6/logging/achrm"
+											}
+										},
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceDataset_qyl",
+											"type": "DatasetReference",
+											"parameters": {
+												"cw_table": "@item().source.table"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DestinationDataset_qyl",
+											"type": "DatasetReference",
+											"parameters": {
+												"cw_fileName": "@item().destination.fileName"
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"cw_items": {
+						"type": "Array",
+						"defaultValue": [
+							{
+								"source": {
+									"table": "achrm_bonus"
+								},
+								"destination": {
+									"fileName": "dbo.achrm_bonus.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "achrm_department"
+								},
+								"destination": {
+									"fileName": "dbo.achrm_department.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "achrm_employee"
+								},
+								"destination": {
+									"fileName": "dbo.achrm_employee.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "achrm_job"
+								},
+								"destination": {
+									"fileName": "dbo.achrm_job.parquet"
+								}
+							}
+						]
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-10-21T10:58:01Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/SourceDataset_qyl')]",
+				"[concat(variables('workspaceId'), '/datasets/DestinationDataset_qyl')]",
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sourceTdatalake_anc')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "ForEach_qq9",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@pipeline().parameters.cw_items",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy_qq9",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [
+										{
+											"name": "Source",
+											"value": "dbo.@{item().source.table}"
+										},
+										{
+											"name": "Destination",
+											"value": "fsngroup6/ANC/@{item().destination.fileName}"
+										}
+									],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": true,
+										"stagingSettings": {
+											"linkedServiceName": {
+												"referenceName": "lsconnection",
+												"type": "LinkedServiceReference"
+											},
+											"path": "fsngroup6/staging/anc"
+										},
+										"logSettings": {
+											"enableCopyActivityLog": true,
+											"copyActivityLogSettings": {
+												"logLevel": "Warning",
+												"enableReliableLogging": false
+											},
+											"logLocationSettings": {
+												"linkedServiceName": {
+													"referenceName": "lsconnection",
+													"type": "LinkedServiceReference"
+												},
+												"path": "fsngroup6/logging/anc"
+											}
+										},
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceDataset_qq9",
+											"type": "DatasetReference",
+											"parameters": {
+												"cw_table": "@item().source.table"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DestinationDataset_qq9",
+											"type": "DatasetReference",
+											"parameters": {
+												"cw_fileName": "@item().destination.fileName"
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"cw_items": {
+						"type": "Array",
+						"defaultValue": [
+							{
+								"source": {
+									"table": "anc_customer"
+								},
+								"destination": {
+									"fileName": "dbo.anc_customer.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "anc_department"
+								},
+								"destination": {
+									"fileName": "dbo.anc_department.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "anc_employee"
+								},
+								"destination": {
+									"fileName": "dbo.anc_employee.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "anc_fin_code"
+								},
+								"destination": {
+									"fileName": "dbo.anc_fin_code.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "anc_product"
+								},
+								"destination": {
+									"fileName": "dbo.anc_product.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "anc_sales_order"
+								},
+								"destination": {
+									"fileName": "dbo.anc_sales_order.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "anc_sales_order_item"
+								},
+								"destination": {
+									"fileName": "dbo.anc_sales_order_item.parquet"
+								}
+							}
+						]
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-10-21T11:00:18Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/SourceDataset_qq9')]",
+				"[concat(variables('workspaceId'), '/datasets/DestinationDataset_qq9')]",
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sourceTdatalake_godb')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "ForEach_507",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@pipeline().parameters.cw_items",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy_507",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [
+										{
+											"name": "Source",
+											"value": "dbo.@{item().source.table}"
+										},
+										{
+											"name": "Destination",
+											"value": "fsngroup6/GO/@{item().destination.fileName}"
+										}
+									],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": true,
+										"stagingSettings": {
+											"linkedServiceName": {
+												"referenceName": "lsconnection",
+												"type": "LinkedServiceReference"
+											},
+											"path": "fsngroup6/staging/go"
+										},
+										"logSettings": {
+											"enableCopyActivityLog": true,
+											"copyActivityLogSettings": {
+												"logLevel": "Warning",
+												"enableReliableLogging": false
+											},
+											"logLocationSettings": {
+												"linkedServiceName": {
+													"referenceName": "lsconnection",
+													"type": "LinkedServiceReference"
+												},
+												"path": "fsngroup6/logging/go"
+											}
+										},
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "SourceDataset_507",
+											"type": "DatasetReference",
+											"parameters": {
+												"cw_table": "@item().source.table"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DestinationDataset_507",
+											"type": "DatasetReference",
+											"parameters": {
+												"cw_fileName": "@item().destination.fileName"
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"cw_items": {
+						"type": "Array",
+						"defaultValue": [
+							{
+								"source": {
+									"table": "go_CAMPAIGN"
+								},
+								"destination": {
+									"fileName": "dbo.go_CAMPAIGN.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_COUNTRY"
+								},
+								"destination": {
+									"fileName": "dbo.go_COUNTRY.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_INVENTORY_LEVELS"
+								},
+								"destination": {
+									"fileName": "dbo.go_INVENTORY_LEVELS.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_ORDER_DETAILS"
+								},
+								"destination": {
+									"fileName": "dbo.go_ORDER_DETAILS.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_ORDER_HEADER"
+								},
+								"destination": {
+									"fileName": "dbo.go_ORDER_HEADER.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_ORDER_METHOD"
+								},
+								"destination": {
+									"fileName": "dbo.go_ORDER_METHOD.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_PRODUCT"
+								},
+								"destination": {
+									"fileName": "dbo.go_PRODUCT.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_PRODUCT_FORECAST"
+								},
+								"destination": {
+									"fileName": "dbo.go_PRODUCT_FORECAST.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_PRODUCT_LINE"
+								},
+								"destination": {
+									"fileName": "dbo.go_PRODUCT_LINE.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_PRODUCT_TYPE"
+								},
+								"destination": {
+									"fileName": "dbo.go_PRODUCT_TYPE.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_PROMOTION"
+								},
+								"destination": {
+									"fileName": "dbo.go_PROMOTION.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_RETAILER"
+								},
+								"destination": {
+									"fileName": "dbo.go_RETAILER.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_RETAILER_SITE"
+								},
+								"destination": {
+									"fileName": "dbo.go_RETAILER_SITE.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_RETAILER_TYPE"
+								},
+								"destination": {
+									"fileName": "dbo.go_RETAILER_TYPE.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_RETURN_REASON"
+								},
+								"destination": {
+									"fileName": "dbo.go_RETURN_REASON.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_RETURNED_ITEM"
+								},
+								"destination": {
+									"fileName": "dbo.go_RETURNED_ITEM.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_SALES_BRANCH"
+								},
+								"destination": {
+									"fileName": "dbo.go_SALES_BRANCH.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_SALES_STAFF"
+								},
+								"destination": {
+									"fileName": "dbo.go_SALES_STAFF.parquet"
+								}
+							},
+							{
+								"source": {
+									"table": "go_SALES_TARGET"
+								},
+								"destination": {
+									"fileName": "dbo.go_SALES_TARGET.parquet"
+								}
+							}
+						]
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-10-21T10:52:53Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/SourceDataset_507')]",
+				"[concat(variables('workspaceId'), '/datasets/DestinationDataset_507')]",
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Country')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dbo.go_COUNTRY.parquet",
+						"folderPath": "GO",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "COUNTRY_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "COUNTRY",
+						"type": "UTF8"
+					},
+					{
+						"name": "LANGUAGE",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DestinationDataset_507')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"cw_fileName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().cw_fileName",
+							"type": "Expression"
+						},
+						"folderPath": "GO",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "none"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DestinationDataset_qq9')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"cw_fileName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().cw_fileName",
+							"type": "Expression"
+						},
+						"folderPath": "ANC",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "none"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DestinationDataset_qyl')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"cw_fileName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().cw_fileName",
+							"type": "Expression"
+						},
+						"folderPath": "ACHRM",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "none",
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\"",
+					"firstRowAsHeader": true
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Parquet1')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dbo.anc_department.parquet",
+						"folderPath": "ANC",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "dept_id",
+						"type": "INT32"
+					},
+					{
+						"name": "dept_name",
+						"type": "UTF8"
+					},
+					{
+						"name": "dept_head_id",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SourceDataset_507')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sourcedb",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"cw_table": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": {
+						"value": "@dataset().cw_table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/sourcedb')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SourceDataset_qq9')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sourcedb",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"cw_table": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": {
+						"value": "@dataset().cw_table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/sourcedb')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SourceDataset_qyl')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sourcedb",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"cw_table": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": {
+						"value": "@dataset().cw_table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/sourcedb')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ancProduct')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dbo.anc_product.parquet",
+						"folderPath": "ANC",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "id",
+						"type": "INT32"
+					},
+					{
+						"name": "name",
+						"type": "UTF8"
+					},
+					{
+						"name": "description",
+						"type": "UTF8"
+					},
+					{
+						"name": "prod_size",
+						"type": "UTF8"
+					},
+					{
+						"name": "color",
+						"type": "UTF8"
+					},
+					{
+						"name": "quantity",
+						"type": "INT32"
+					},
+					{
+						"name": "unit_price",
+						"type": "DECIMAL",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "picture_name",
+						"type": "UTF8"
+					},
+					{
+						"name": "category",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/anc_employee')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dbo.anc_employee.parquet",
+						"folderPath": "ANC",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "emp_id",
+						"type": "INT32"
+					},
+					{
+						"name": "manager_id",
+						"type": "INT32"
+					},
+					{
+						"name": "emp_fname",
+						"type": "UTF8"
+					},
+					{
+						"name": "emp_lname",
+						"type": "UTF8"
+					},
+					{
+						"name": "dept_id",
+						"type": "INT32"
+					},
+					{
+						"name": "street",
+						"type": "UTF8"
+					},
+					{
+						"name": "city",
+						"type": "UTF8"
+					},
+					{
+						"name": "state",
+						"type": "UTF8"
+					},
+					{
+						"name": "zip_code",
+						"type": "UTF8"
+					},
+					{
+						"name": "phone",
+						"type": "UTF8"
+					},
+					{
+						"name": "status",
+						"type": "UTF8"
+					},
+					{
+						"name": "ss_number",
+						"type": "UTF8"
+					},
+					{
+						"name": "salary",
+						"type": "DECIMAL",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "start_date",
+						"type": "INT96"
+					},
+					{
+						"name": "termination_date",
+						"type": "UTF8"
+					},
+					{
+						"name": "birth_date",
+						"type": "INT96"
+					},
+					{
+						"name": "bene_health_ins",
+						"type": "UTF8"
+					},
+					{
+						"name": "bene_life_ins",
+						"type": "UTF8"
+					},
+					{
+						"name": "bene_day_care",
+						"type": "UTF8"
+					},
+					{
+						"name": "sex",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/codeCountry')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "codeCountry_stagging-00001",
+						"folderPath": "code_country",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "SALES_BRANCH_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "ADDRESS1",
+						"type": "UTF8"
+					},
+					{
+						"name": "ADDRESS2",
+						"type": "UTF8"
+					},
+					{
+						"name": "CITY",
+						"type": "UTF8"
+					},
+					{
+						"name": "REGION",
+						"type": "UTF8"
+					},
+					{
+						"name": "POSTAL_ZONE",
+						"type": "UTF8"
+					},
+					{
+						"name": "COUNTRY_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "COUNTRY",
+						"type": "UTF8"
+					},
+					{
+						"name": "LANGUAGE",
+						"type": "UTF8"
+					},
+					{
+						"name": "Source",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/datalake_location')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dbo.go_SALES_BRANCH.parquet",
+						"folderPath": "GO",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "SALES_BRANCH_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "ADDRESS1",
+						"type": "UTF8"
+					},
+					{
+						"name": "ADDRESS2",
+						"type": "UTF8"
+					},
+					{
+						"name": "CITY",
+						"type": "UTF8"
+					},
+					{
+						"name": "REGION",
+						"type": "UTF8"
+					},
+					{
+						"name": "POSTAL_ZONE",
+						"type": "UTF8"
+					},
+					{
+						"name": "COUNTRY_CODE",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dim_anc_product')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dim_AncProduct_stagging-00001.parquet",
+						"folderPath": "dim_AncProduct",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "id",
+						"type": "INT32"
+					},
+					{
+						"name": "name",
+						"type": "UTF8"
+					},
+					{
+						"name": "description",
+						"type": "UTF8"
+					},
+					{
+						"name": "prod_size",
+						"type": "UTF8"
+					},
+					{
+						"name": "color",
+						"type": "UTF8"
+					},
+					{
+						"name": "quantity",
+						"type": "INT32"
+					},
+					{
+						"name": "unit_price",
+						"type": "DECIMAL",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "picture_name",
+						"type": "UTF8"
+					},
+					{
+						"name": "category",
+						"type": "UTF8"
+					},
+					{
+						"name": "Source",
+						"type": "UTF8"
+					},
+					{
+						"name": "ProductKey",
+						"type": "UTF8"
+					},
+					{
+						"name": "ProductID",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dim_go_product')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dim_goProduct_stagging-00001.parquet",
+						"folderPath": "dim_goProduct",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "PRODUCT_NUMBER",
+						"type": "INT32"
+					},
+					{
+						"name": "INTRODUCTION_DATE",
+						"type": "INT96"
+					},
+					{
+						"name": "PRODUCT_TYPE_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "PRODUCTION_COST",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "MARGIN",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "PRODUCT_IMAGE",
+						"type": "UTF8"
+					},
+					{
+						"name": "PRODUCT_NAME",
+						"type": "UTF8"
+					},
+					{
+						"name": "PRODUCT_LINE_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "PRODUCT_TYPE_EN",
+						"type": "UTF8"
+					},
+					{
+						"name": "Source",
+						"type": "UTF8"
+					},
+					{
+						"name": "ProductID",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dim_product_anc')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ProductKey",
+						"type": "varchar"
+					},
+					{
+						"name": "ProductID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Productname",
+						"type": "varchar"
+					},
+					{
+						"name": "Producttype",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Productioncost",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "Productcode",
+						"type": "varchar"
+					},
+					{
+						"name": "Productcatagory",
+						"type": "varchar"
+					},
+					{
+						"name": "Productdescription",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Dim_Product"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/DWH')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dim_product_go')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ProductKey",
+						"type": "varchar"
+					},
+					{
+						"name": "ProductID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Productname",
+						"type": "varchar"
+					},
+					{
+						"name": "Producttype",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Productioncost",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Productcode",
+						"type": "varchar"
+					},
+					{
+						"name": "Productcatagory",
+						"type": "varchar"
+					},
+					{
+						"name": "Productdescription",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Dim_Product"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/DWH')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dwh_verkopen')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "LocationID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Address",
+						"type": "nvarchar"
+					},
+					{
+						"name": "City",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Country",
+						"type": "nvarchar"
+					},
+					{
+						"name": "State",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Source",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Location"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/DWH')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/goProductType')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dbo.go_PRODUCT_TYPE.parquet",
+						"folderPath": "GO",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "PRODUCT_TYPE_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "PRODUCT_LINE_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "PRODUCT_TYPE_EN",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/go_product')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dbo.go_PRODUCT.parquet",
+						"folderPath": "GO",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "PRODUCT_NUMBER",
+						"type": "INT32"
+					},
+					{
+						"name": "INTRODUCTION_DATE",
+						"type": "INT96"
+					},
+					{
+						"name": "PRODUCT_TYPE_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "PRODUCTION_COST",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "MARGIN",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "PRODUCT_IMAGE",
+						"type": "UTF8"
+					},
+					{
+						"name": "PRODUCT_NAME",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/go_sales_staff')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dbo.go_SALES_STAFF.parquet",
+						"folderPath": "GO",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "SALES_STAFF_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "FIRST_NAME",
+						"type": "UTF8"
+					},
+					{
+						"name": "LAST_NAME",
+						"type": "UTF8"
+					},
+					{
+						"name": "POSITION_EN",
+						"type": "UTF8"
+					},
+					{
+						"name": "WORK_PHONE",
+						"type": "UTF8"
+					},
+					{
+						"name": "EXTENSION",
+						"type": "UTF8"
+					},
+					{
+						"name": "FAX",
+						"type": "UTF8"
+					},
+					{
+						"name": "EMAIL",
+						"type": "UTF8"
+					},
+					{
+						"name": "DATE_HIRED",
+						"type": "INT96"
+					},
+					{
+						"name": "SALES_BRANCH_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "MANAGER_CODE",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AzureTableStorageGo')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureTableStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureTableStorageGo_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DWH')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('DWH_properties_typeProperties_server')]",
+					"database": "[parameters('DWH_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('DWH_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('DWH_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/lsconnection')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('lsconnection_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('lsconnection_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sourcedb')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('sourcedb_properties_typeProperties_server')]",
+					"database": "[parameters('sourcedb_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('sourcedb_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('sourcedb_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/syngroup6-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('syngroup6-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/syngroup6-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('syngroup6-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dim_employee')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "go_sales_staff",
+								"type": "DatasetReference"
+							},
+							"name": "go"
+						},
+						{
+							"dataset": {
+								"referenceName": "anc_employee",
+								"type": "DatasetReference"
+							},
+							"name": "anc"
+						},
+						{
+							"dataset": {
+								"referenceName": "Parquet1",
+								"type": "DatasetReference"
+							},
+							"name": "ancDepartment"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "lsconnection",
+								"type": "LinkedServiceReference"
+							},
+							"name": "GoDimEmployee"
+						},
+						{
+							"linkedService": {
+								"referenceName": "lsconnection",
+								"type": "LinkedServiceReference"
+							},
+							"name": "ANCDimEmployee"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "mappingANC"
+						},
+						{
+							"name": "derivedColumn2"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          SALES_STAFF_CODE as integer,",
+						"          FIRST_NAME as string,",
+						"          LAST_NAME as string,",
+						"          POSITION_EN as string,",
+						"          WORK_PHONE as string,",
+						"          EXTENSION as string,",
+						"          FAX as string,",
+						"          EMAIL as string,",
+						"          DATE_HIRED as timestamp,",
+						"          SALES_BRANCH_CODE as integer,",
+						"          MANAGER_CODE as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> go",
+						"source(output(",
+						"          emp_id as integer,",
+						"          manager_id as integer,",
+						"          emp_fname as string,",
+						"          emp_lname as string,",
+						"          dept_id as integer,",
+						"          street as string,",
+						"          city as string,",
+						"          state as string,",
+						"          zip_code as string,",
+						"          phone as string,",
+						"          status as string,",
+						"          ss_number as string,",
+						"          salary as decimal(18,0),",
+						"          start_date as timestamp,",
+						"          termination_date as string,",
+						"          birth_date as timestamp,",
+						"          bene_health_ins as string,",
+						"          bene_life_ins as string,",
+						"          bene_day_care as string,",
+						"          sex as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> anc",
+						"source(output(",
+						"          dept_id as integer,",
+						"          dept_name as string,",
+						"          dept_head_id as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> ancDepartment",
+						"go derive(EmployeeKey = concatWS(\"_\", toString(SALES_STAFF_CODE), \"GO\"),",
+						"          Department = '',",
+						"          Employeestatus = '',",
+						"          Enddate = '') ~> derivedColumn1",
+						"anc, ancDepartment join(anc@dept_id == ancDepartment@dept_id,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> mappingANC",
+						"mappingANC derive(EmployeeKey = concatWS('_', toString(emp_id), '_ANC')) ~> derivedColumn2",
+						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     fileSystem: 'fsngroup6',",
+						"     folderPath: 'dim_goEmployee',",
+						"     truncate: true,",
+						"     compressionCodec: 'none',",
+						"     filePattern:'dim_go_employee_stagging.parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> GoDimEmployee",
+						"derivedColumn2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     fileSystem: 'fsngroup6',",
+						"     folderPath: 'dim_anc_employee',",
+						"     filePattern:'dim_anc_employee_stagging.parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> ANCDimEmployee"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/go_sales_staff')]",
+				"[concat(variables('workspaceId'), '/datasets/anc_employee')]",
+				"[concat(variables('workspaceId'), '/datasets/Parquet1')]",
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/go_Product')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "go_product",
+								"type": "DatasetReference"
+							},
+							"name": "go"
+						},
+						{
+							"dataset": {
+								"referenceName": "goProductType",
+								"type": "DatasetReference"
+							},
+							"name": "goProductType"
+						},
+						{
+							"dataset": {
+								"referenceName": "ancProduct",
+								"type": "DatasetReference"
+							},
+							"name": "ancProduct"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "lsconnection",
+								"type": "LinkedServiceReference"
+							},
+							"name": "goProduct",
+							"rejectedDataLinkedService": {
+								"referenceName": "lsconnection",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"linkedService": {
+								"referenceName": "lsconnection",
+								"type": "LinkedServiceReference"
+							},
+							"name": "dimAncProduct"
+						}
+					],
+					"transformations": [
+						{
+							"name": "joinProductProductType"
+						},
+						{
+							"name": "addSourceColumn"
+						},
+						{
+							"name": "mappingIDSource"
+						},
+						{
+							"name": "addSourceColumn2"
+						},
+						{
+							"name": "mappingIDSource2"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          PRODUCT_NUMBER as integer,",
+						"          INTRODUCTION_DATE as timestamp,",
+						"          PRODUCT_TYPE_CODE as integer,",
+						"          PRODUCTION_COST as double,",
+						"          MARGIN as double,",
+						"          PRODUCT_IMAGE as string,",
+						"          PRODUCT_NAME as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> go",
+						"source(output(",
+						"          PRODUCT_TYPE_CODE as integer,",
+						"          PRODUCT_LINE_CODE as integer,",
+						"          PRODUCT_TYPE_EN as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> goProductType",
+						"source(output(",
+						"          id as integer,",
+						"          name as string,",
+						"          description as string,",
+						"          prod_size as string,",
+						"          color as string,",
+						"          quantity as integer,",
+						"          unit_price as decimal(18,0),",
+						"          picture_name as string,",
+						"          category as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> ancProduct",
+						"go, goProductType join(go@PRODUCT_TYPE_CODE == goProductType@PRODUCT_TYPE_CODE,",
+						"     joinType:'inner',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> joinProductProductType",
+						"joinProductProductType derive(Source = 'GO') ~> addSourceColumn",
+						"addSourceColumn derive(ProductKey = concatWS('_',toString(PRODUCT_NUMBER),Source),",
+						"          ProductID = PRODUCT_NUMBER,",
+						"          productdescription = '') ~> mappingIDSource",
+						"ancProduct derive(Source = 'ANC') ~> addSourceColumn2",
+						"addSourceColumn2 derive(ProductKey = concatWS(\"_\", toString(id), Source),",
+						"          ProductID = id,",
+						"          productioncost = 0,",
+						"          Producttype = 0) ~> mappingIDSource2",
+						"mappingIDSource sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     fileSystem: 'fsngroup6',",
+						"     folderPath: 'dim_goProduct',",
+						"     truncate: true,",
+						"     compressionCodec: 'none',",
+						"     filePattern:'dim_goProduct_stagging.parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> goProduct",
+						"mappingIDSource2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     fileSystem: 'fsngroup6',",
+						"     folderPath: 'dim_AncProduct',",
+						"     truncate: true,",
+						"     filePattern:'dim_AncProduct_stagging.parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> dimAncProduct"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/go_product')]",
+				"[concat(variables('workspaceId'), '/datasets/goProductType')]",
+				"[concat(variables('workspaceId'), '/datasets/ancProduct')]",
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/mapping_country')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "datalake_location",
+								"type": "DatasetReference"
+							},
+							"name": "code"
+						},
+						{
+							"dataset": {
+								"referenceName": "Country",
+								"type": "DatasetReference"
+							},
+							"name": "counrty"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "lsconnection",
+								"type": "LinkedServiceReference"
+							},
+							"name": "codeCounrty",
+							"rejectedDataLinkedService": {
+								"referenceName": "lsconnection",
+								"type": "LinkedServiceReference"
+							}
+						}
+					],
+					"transformations": [
+						{
+							"name": "innerJoinCountry"
+						},
+						{
+							"name": "addSource"
+						}
+					],
+					"scriptLines": [
+						"parameters{",
+						"     go as string ('go')",
+						"}",
+						"source(output(",
+						"          SALES_BRANCH_CODE as integer,",
+						"          ADDRESS1 as string,",
+						"          ADDRESS2 as string,",
+						"          CITY as string,",
+						"          REGION as string,",
+						"          POSTAL_ZONE as string,",
+						"          COUNTRY_CODE as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> code",
+						"source(output(",
+						"          COUNTRY_CODE as integer,",
+						"          COUNTRY as string,",
+						"          LANGUAGE as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> counrty",
+						"code, counrty join(code@COUNTRY_CODE == counrty@COUNTRY_CODE,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> innerJoinCountry",
+						"innerJoinCountry derive(Source = $go) ~> addSource",
+						"addSource sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     fileSystem: 'fsngroup6',",
+						"     folderPath: 'code_country',",
+						"     truncate: true,",
+						"     compressionCodec: 'none',",
+						"     filePattern:'codeCountry_stagging',",
+						"     umask: 0222,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     saveOrder: 1) ~> codeCounrty"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/datalake_location')]",
+				"[concat(variables('workspaceId'), '/datasets/Country')]",
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		}
+	]
+}

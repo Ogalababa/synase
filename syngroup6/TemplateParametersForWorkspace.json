@@ -1,0 +1,48 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "syngroup6"
+		},
+		"AzureTableStorageGo_connectionString": {
+			"value": ""
+		},
+		"DWH_password": {
+			"value": ""
+		},
+		"lsconnection_accountKey": {
+			"value": ""
+		},
+		"sourcedb_password": {
+			"value": ""
+		},
+		"syngroup6-WorkspaceDefaultSqlServer_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:syngroup6.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"DWH_properties_typeProperties_server": {
+			"value": "se5group6.database.windows.net"
+		},
+		"DWH_properties_typeProperties_database": {
+			"value": "Se5A7CGroup6"
+		},
+		"DWH_properties_typeProperties_userName": {
+			"value": "anton"
+		},
+		"lsconnection_properties_typeProperties_url": {
+			"value": "https://dlsagroup6.dfs.core.windows.net/"
+		},
+		"sourcedb_properties_typeProperties_server": {
+			"value": "se5group6.database.windows.net"
+		},
+		"sourcedb_properties_typeProperties_database": {
+			"value": "Se5GoGroup6"
+		},
+		"sourcedb_properties_typeProperties_userName": {
+			"value": "anton"
+		},
+		"syngroup6-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://dlsagroup6.dfs.core.windows.net"
+		}
+	}
+}
