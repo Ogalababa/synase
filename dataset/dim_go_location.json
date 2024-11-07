@@ -1,0 +1,62 @@
+{
+	"name": "dim_go_location",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dim_go_location_stagging-00001.parquet",
+				"folderPath": "dim_go_location",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "SALES_BRANCH_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "ADDRESS1",
+				"type": "UTF8"
+			},
+			{
+				"name": "ADDRESS2",
+				"type": "UTF8"
+			},
+			{
+				"name": "CITY",
+				"type": "UTF8"
+			},
+			{
+				"name": "REGION",
+				"type": "UTF8"
+			},
+			{
+				"name": "POSTAL_ZONE",
+				"type": "UTF8"
+			},
+			{
+				"name": "COUNTRY_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "COUNTRY",
+				"type": "UTF8"
+			},
+			{
+				"name": "LANGUAGE",
+				"type": "UTF8"
+			},
+			{
+				"name": "LocationID",
+				"type": "UTF8"
+			}
+		]
+	}
+}
