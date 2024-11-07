@@ -90,7 +90,10 @@
 								"parameters": {},
 								"datasetParameters": {
 									"goCustomer": {},
-									"dimGoCustomer": {}
+									"source1": {},
+									"source2": {},
+									"dimGoCustomer": {},
+									"sink1": {}
 								}
 							},
 							"staging": {},
@@ -104,6 +107,8 @@
 					{
 						"name": "Copy go customer",
 						"type": "Copy",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "mapping customer",
@@ -161,11 +166,7 @@
 										}
 									},
 									{
-										"source": {
-											"name": "RETAILER_CODE",
-											"type": "Int32",
-											"physicalType": "INT32"
-										},
+										"source": {},
 										"sink": {
 											"name": "CustomerID",
 											"type": "Int32",
@@ -173,11 +174,7 @@
 										}
 									},
 									{
-										"source": {
-											"name": "CustomerLocation",
-											"type": "Int32",
-											"physicalType": "INT32"
-										},
+										"source": {},
 										"sink": {
 											"name": "DIM_Customerlocation",
 											"type": "String",
@@ -185,11 +182,7 @@
 										}
 									},
 									{
-										"source": {
-											"name": "COMPANY_NAME",
-											"type": "String",
-											"physicalType": "UTF8"
-										},
+										"source": {},
 										"sink": {
 											"name": "Name",
 											"type": "String",
@@ -209,25 +202,9 @@
 										}
 									},
 									{
-										"source": {
-											"name": "COMPANY_NAME",
-											"type": "String",
-											"physicalType": "UTF8"
-										},
+										"source": {},
 										"sink": {
 											"name": "Companyname",
-											"type": "String",
-											"physicalType": "varchar"
-										}
-									},
-									{
-										"source": {
-											"name": "CustomerLocation",
-											"type": "Int32",
-											"physicalType": "INT32"
-										},
-										"sink": {
-											"name": "Customeradress",
 											"type": "String",
 											"physicalType": "varchar"
 										}
@@ -276,8 +253,6 @@
 					{
 						"name": "mapping_dim_Location",
 						"type": "ExecuteDataFlow",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -1133,8 +1108,6 @@
 					{
 						"name": "mapping_Dim_product",
 						"type": "ExecuteDataFlow",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -3049,6 +3022,49 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/dim_go_RETAILER_stagging')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dbo.go_RETAILER.parquet",
+						"folderPath": "GO",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "RETAILER_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "RETAILER_CODEMR",
+						"type": "INT32"
+					},
+					{
+						"name": "COMPANY_NAME",
+						"type": "UTF8"
+					},
+					{
+						"name": "RETAILER_TYPE_CODE",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/dim_go_customer')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -4689,10 +4705,24 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "dim_go_customer",
+								"referenceName": "dim_go_RETAILER_stagging",
 								"type": "DatasetReference"
 							},
 							"name": "goCustomer"
+						},
+						{
+							"dataset": {
+								"referenceName": "dwh_dim_location",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						},
+						{
+							"dataset": {
+								"referenceName": "anc_customer",
+								"type": "DatasetReference"
+							},
+							"name": "source2"
 						}
 					],
 					"sinks": [
@@ -4702,11 +4732,27 @@
 								"type": "LinkedServiceReference"
 							},
 							"name": "dimGoCustomer"
+						},
+						{
+							"linkedService": {
+								"referenceName": "lsconnection",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sink1"
 						}
 					],
 					"transformations": [
 						{
 							"name": "derivedColumn1"
+						},
+						{
+							"name": "join1"
+						},
+						{
+							"name": "derivedColumn2"
+						},
+						{
+							"name": "join2"
 						}
 					],
 					"scriptLines": [
@@ -4720,10 +4766,50 @@
 						"     validateSchema: false,",
 						"     ignoreNoFilesFound: false,",
 						"     format: 'parquet') ~> goCustomer",
+						"source(output(",
+						"          LocationID as string,",
+						"          Adress as string,",
+						"          City as string,",
+						"          Country as string,",
+						"          State as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> source1",
+						"source(output(",
+						"          id as integer,",
+						"          fname as string,",
+						"          lname as string,",
+						"          address as string,",
+						"          city as string,",
+						"          state as string,",
+						"          zip as string,",
+						"          phone as string,",
+						"          company_name as string,",
+						"          type as string,",
+						"          discount as integer,",
+						"          max_quantity_order as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> source2",
 						"goCustomer derive(CustomerKey = concatWS('_', toString(RETAILER_CODE), \"_GO\"),",
-						"          CustomerLocation = '',",
+						"          CustomerLocation = concatWS('_', toString(RETAILER_CODE), \"_GO\"),",
 						"          Discount = '') ~> derivedColumn1",
-						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"source1, derivedColumn1 join(LocationID == CustomerLocation,",
+						"     joinType:'inner',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1",
+						"source2 derive(CustomerKey = concatWS('_', toString(id), '_ANC_CUSTOMER')) ~> derivedColumn2",
+						"derivedColumn2, source1 join(CustomerKey == LocationID,",
+						"     joinType:'inner',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join2",
+						"join1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
 						"     fileSystem: 'fsngroup6',",
@@ -4735,12 +4821,27 @@
 						"     preCommands: [],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> dimGoCustomer"
+						"     skipDuplicateMapOutputs: true) ~> dimGoCustomer",
+						"join2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     fileSystem: 'fsngroup6',",
+						"     folderPath: 'dim_ANC_customer',",
+						"     truncate: true,",
+						"     compressionCodec: 'none',",
+						"     filePattern:'dim_ANC_customer_stagging.parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sink1"
 					]
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/datasets/dim_go_customer')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_go_RETAILER_stagging')]",
+				"[concat(variables('workspaceId'), '/datasets/dwh_dim_location')]",
+				"[concat(variables('workspaceId'), '/datasets/anc_customer')]",
 				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
 			]
 		},
