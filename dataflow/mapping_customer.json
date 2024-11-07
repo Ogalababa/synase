@@ -98,7 +98,7 @@
 				"     format: 'parquet') ~> source2",
 				"goCustomer derive(CustomerKey = concatWS('_', toString(RETAILER_CODE), \"GO\"),",
 				"          CustomerLocation = concatWS('_', toString(RETAILER_CODE), \"GO\"),",
-				"          Discount = '',",
+				"          Discount = 0,",
 				"          Name = '') ~> derivedColumn1",
 				"source1, derivedColumn1 join(LocationID == CustomerLocation,",
 				"     joinType:'inner',",

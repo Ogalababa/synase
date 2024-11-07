@@ -1,0 +1,91 @@
+{
+	"name": "Dataflow2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "dwh_dim_location",
+						"type": "DatasetReference"
+					},
+					"name": "LocationID"
+				},
+				{
+					"dataset": {
+						"referenceName": "dwh_dim_employee_go",
+						"type": "DatasetReference"
+					},
+					"name": "employeelID"
+				},
+				{
+					"linkedService": {
+						"referenceName": "lsconnection",
+						"type": "LinkedServiceReference"
+					},
+					"name": "salary"
+				},
+				{
+					"linkedService": {
+						"referenceName": "lsconnection",
+						"type": "LinkedServiceReference"
+					},
+					"name": "Bonus"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "joinlocation"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          LocationID as string,",
+				"          Adress as string,",
+				"          City as string,",
+				"          Country as string,",
+				"          State as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> LocationID",
+				"source(output(",
+				"          Employeekey as string,",
+				"          EployeeID as integer,",
+				"          DepartmentID as integer,",
+				"          Firstname as string,",
+				"          Lastname as string,",
+				"          Department as string,",
+				"          Employeestatus as integer,",
+				"          Startdate as date,",
+				"          Enddate as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> employeelID",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet',",
+				"     fileSystem: 'fsngroup6',",
+				"     folderPath: 'ANC',",
+				"     fileName: 'dbo.anc_employee.parquet') ~> salary",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet',",
+				"     fileSystem: 'fsngroup6',",
+				"     folderPath: 'ACHRM',",
+				"     fileName: 'dbo.achrm_bonus.parquet') ~> Bonus",
+				"employeelID, LocationID join(Employeekey == LocationID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinlocation"
+			]
+		}
+	}
+}
