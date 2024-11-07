@@ -6,10 +6,24 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "dim_go_customer",
+						"referenceName": "dim_go_RETAILER_stagging",
 						"type": "DatasetReference"
 					},
 					"name": "goCustomer"
+				},
+				{
+					"dataset": {
+						"referenceName": "dwh_dim_location",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "anc_customer",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
 				}
 			],
 			"sinks": [
@@ -19,11 +33,27 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "dimGoCustomer"
+				},
+				{
+					"linkedService": {
+						"referenceName": "lsconnection",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
 				}
 			],
 			"transformations": [
 				{
 					"name": "derivedColumn1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "join2"
 				}
 			],
 			"scriptLines": [
@@ -37,10 +67,50 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     format: 'parquet') ~> goCustomer",
+				"source(output(",
+				"          LocationID as string,",
+				"          Adress as string,",
+				"          City as string,",
+				"          Country as string,",
+				"          State as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"source(output(",
+				"          id as integer,",
+				"          fname as string,",
+				"          lname as string,",
+				"          address as string,",
+				"          city as string,",
+				"          state as string,",
+				"          zip as string,",
+				"          phone as string,",
+				"          company_name as string,",
+				"          type as string,",
+				"          discount as integer,",
+				"          max_quantity_order as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> source2",
 				"goCustomer derive(CustomerKey = concatWS('_', toString(RETAILER_CODE), \"_GO\"),",
-				"          CustomerLocation = '',",
+				"          CustomerLocation = concatWS('_', toString(RETAILER_CODE), \"_GO\"),",
 				"          Discount = '') ~> derivedColumn1",
-				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"source1, derivedColumn1 join(LocationID == CustomerLocation,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"source2 derive(CustomerKey = concatWS('_', toString(id), '_ANC_CUSTOMER')) ~> derivedColumn2",
+				"derivedColumn2, source1 join(CustomerKey == LocationID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"join1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'parquet',",
 				"     fileSystem: 'fsngroup6',",
@@ -52,7 +122,20 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> dimGoCustomer"
+				"     skipDuplicateMapOutputs: true) ~> dimGoCustomer",
+				"join2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     fileSystem: 'fsngroup6',",
+				"     folderPath: 'dim_ANC_customer',",
+				"     truncate: true,",
+				"     compressionCodec: 'none',",
+				"     filePattern:'dim_ANC_customer_stagging.parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
 		}
 	}
