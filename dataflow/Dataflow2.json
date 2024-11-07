@@ -6,51 +6,91 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "dwh_dim_location",
+						"referenceName": "dim_product_anc",
 						"type": "DatasetReference"
 					},
-					"name": "LocationID"
+					"name": "ProductID"
 				},
 				{
 					"dataset": {
-						"referenceName": "dwh_dim_employee_go",
+						"referenceName": "dwh_go_customer",
 						"type": "DatasetReference"
 					},
-					"name": "employeelID"
+					"name": "CustomerID"
 				},
 				{
-					"linkedService": {
-						"referenceName": "lsconnection",
-						"type": "LinkedServiceReference"
+					"dataset": {
+						"referenceName": "dwh_anc_employee",
+						"type": "DatasetReference"
 					},
-					"name": "salary"
+					"name": "EmployeeID"
 				},
 				{
-					"linkedService": {
-						"referenceName": "lsconnection",
-						"type": "LinkedServiceReference"
+					"dataset": {
+						"referenceName": "db_go_order_details",
+						"type": "DatasetReference"
 					},
-					"name": "Bonus"
+					"name": "orderdetailsGO"
+				},
+				{
+					"dataset": {
+						"referenceName": "go_order_header",
+						"type": "DatasetReference"
+					},
+					"name": "orderHeader"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "lsconnection",
+						"type": "LinkedServiceReference"
+					},
+					"name": "goDalesorder"
+				}
+			],
 			"transformations": [
 				{
-					"name": "joinlocation"
+					"name": "LineTotal"
+				},
+				{
+					"name": "joinOrderHeader"
+				},
+				{
+					"name": "EmployeelKey"
+				},
+				{
+					"name": "joinEmployeelID"
 				}
 			],
 			"scriptLines": [
 				"source(output(",
-				"          LocationID as string,",
-				"          Adress as string,",
-				"          City as string,",
-				"          Country as string,",
-				"          State as string",
+				"          ProductKey as string,",
+				"          ProductID as integer,",
+				"          Productname as string,",
+				"          Producttype as integer,",
+				"          Productioncost as double,",
+				"          Productcode as string,",
+				"          Productcatagory as string,",
+				"          Productdescription as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> LocationID",
+				"     format: 'table') ~> ProductID",
+				"source(output(",
+				"          CustomerKey as string,",
+				"          CustomerID as integer,",
+				"          DIM_Customerlocation as string,",
+				"          Name as string,",
+				"          Discount as integer,",
+				"          Companyname as string,",
+				"          Customeradress as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> CustomerID",
 				"source(output(",
 				"          Employeekey as string,",
 				"          EployeeID as integer,",
@@ -65,26 +105,64 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     format: 'table') ~> employeelID",
-				"source(allowSchemaDrift: true,",
+				"     format: 'table') ~> EmployeeID",
+				"source(output(",
+				"          ORDER_DETAIL_CODE as integer,",
+				"          ORDER_NUMBER as integer,",
+				"          PRODUCT_NUMBER as integer,",
+				"          QUANTITY as integer,",
+				"          UNIT_COST as double,",
+				"          UNIT_PRICE as double,",
+				"          UNIT_SALE_PRICE as double",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false,",
-				"     format: 'parquet',",
-				"     fileSystem: 'fsngroup6',",
-				"     folderPath: 'ANC',",
-				"     fileName: 'dbo.anc_employee.parquet') ~> salary",
-				"source(allowSchemaDrift: true,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> orderdetailsGO",
+				"source(output(",
+				"          ORDER_NUMBER as integer,",
+				"          RETAILER_NAME as string,",
+				"          RETAILER_SITE_CODE as integer,",
+				"          RETAILER_COUNTACT_CODE as integer,",
+				"          SALES_STAFF_CODE as integer,",
+				"          SALES_BRANCH_CODE as integer,",
+				"          ORDER_DATE as timestamp,",
+				"          ORDER_METHOD_CODE as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false,",
-				"     format: 'parquet',",
-				"     fileSystem: 'fsngroup6',",
-				"     folderPath: 'ACHRM',",
-				"     fileName: 'dbo.achrm_bonus.parquet') ~> Bonus",
-				"employeelID, LocationID join(Employeekey == LocationID,",
-				"     joinType:'inner',",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> orderHeader",
+				"orderdetailsGO derive(LineTotal = QUANTITY*UNIT_SALE_PRICE,",
+				"          DiscountUnitPrice = UNIT_SALE_PRICE,",
+				"          ActualUnitPrice = UNIT_SALE_PRICE) ~> LineTotal",
+				"LineTotal, orderHeader join(orderdetailsGO@ORDER_NUMBER == orderHeader@ORDER_NUMBER,",
+				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> joinlocation"
+				"     broadcast: 'auto')~> joinOrderHeader",
+				"joinOrderHeader derive(Employeekey = concatWS('_', toString(SALES_STAFF_CODE), 'GO'),",
+				"          DateID = toDate(ORDER_DATE) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd'))\r",
+				",",
+				"          SalesorderID = concatWS('_', concatWS('_', toString(ORDER_DETAIL_CODE), toString(PRODUCT_NUMBER)), toString(QUANTITY))) ~> EmployeelKey",
+				"EmployeelKey, EmployeeID join(EmployeelKey@Employeekey == EmployeeID@Employeekey,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinEmployeelID",
+				"joinEmployeelID sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     fileSystem: 'fsngroup6',",
+				"     folderPath: 'fact_Salesorder',",
+				"     truncate: true,",
+				"     compressionCodec: 'none',",
+				"     filePattern:'fact_salesorder_stagging.parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> goDalesorder"
 			]
 		}
 	}

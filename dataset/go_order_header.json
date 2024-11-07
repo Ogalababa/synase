@@ -1,0 +1,57 @@
+{
+	"name": "go_order_header",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "sourcedb",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "ORDER_NUMBER",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "RETAILER_NAME",
+				"type": "nvarchar"
+			},
+			{
+				"name": "RETAILER_SITE_CODE",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "RETAILER_COUNTACT_CODE",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "SALES_STAFF_CODE",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "SALES_BRANCH_CODE",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ORDER_DATE",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "ORDER_METHOD_CODE",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "go_ORDER_HEADER"
+		}
+	}
+}
