@@ -1,0 +1,24 @@
+{
+	"name": "Trigger to dwh",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "datalake_To_DWH_Dim_product",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 24,
+				"startTime": "2024-11-07T04:08:00",
+				"timeZone": "W. Europe Standard Time"
+			}
+		}
+	}
+}
