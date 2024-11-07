@@ -38,7 +38,7 @@
 				"     ignoreNoFilesFound: false,",
 				"     format: 'parquet') ~> goCustomer",
 				"goCustomer derive(CustomerKey = concatWS('_', toString(RETAILER_CODE), \"_GO\"),",
-				"          CustomerLocation = 0,",
+				"          CustomerLocation = '',",
 				"          Discount = '') ~> derivedColumn1",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
