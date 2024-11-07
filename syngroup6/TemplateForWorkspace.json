@@ -66,6 +66,56 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('workspaceName'), '/datalake_To_DWH_Dim_Location')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "mapping_dim_Location",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "mapping_country",
+								"type": "DataFlowReference",
+								"parameters": {
+									"go": "'go'"
+								},
+								"datasetParameters": {
+									"code": {},
+									"counrty": {},
+									"codeCounrty": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-11-06T14:14:15Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/mapping_country')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/datalake_To_DWH_Dim_employee')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
@@ -74,6 +124,8 @@
 					{
 						"name": "mappingDimEmployee",
 						"type": "ExecuteDataFlow",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -483,6 +535,8 @@
 					{
 						"name": "mapping_Dim_product",
 						"type": "ExecuteDataFlow",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -852,190 +906,6 @@
 				"[concat(variables('workspaceId'), '/datasets/dim_product_go')]",
 				"[concat(variables('workspaceId'), '/datasets/dim_anc_product')]",
 				"[concat(variables('workspaceId'), '/datasets/dim_product_anc')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/datalake_To_DWH_verkoop')]",
-			"type": "Microsoft.Synapse/workspaces/pipelines",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"activities": [
-					{
-						"name": "go_to_dwh_location",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "mapping_country_code",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "ParquetSource",
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "ParquetReadSettings"
-								}
-							},
-							"sink": {
-								"type": "AzureSqlSink",
-								"writeBehavior": "upsert",
-								"upsertSettings": {
-									"useTempDB": true,
-									"keys": [
-										"LocationID",
-										"Source"
-									]
-								},
-								"sqlWriterUseTableLock": false,
-								"disableMetricsCollection": false
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"mappings": [
-									{
-										"source": {
-											"name": "SALES_BRANCH_CODE",
-											"type": "INT32"
-										},
-										"sink": {
-											"name": "LocationID",
-											"type": "int",
-											"precision": 10
-										}
-									},
-									{
-										"source": {
-											"name": "COUNTRY",
-											"type": "UTF8"
-										},
-										"sink": {
-											"name": "Country",
-											"type": "nvarchar"
-										}
-									},
-									{
-										"source": {
-											"name": "REGION",
-											"type": "UTF8"
-										},
-										"sink": {
-											"name": "State",
-											"type": "nvarchar"
-										}
-									},
-									{
-										"source": {
-											"name": "CITY",
-											"type": "UTF8"
-										},
-										"sink": {
-											"name": "City",
-											"type": "nvarchar"
-										}
-									},
-									{
-										"source": {
-											"name": "Source",
-											"type": "UTF8"
-										},
-										"sink": {
-											"name": "Source",
-											"type": "nvarchar"
-										}
-									},
-									{
-										"source": {
-											"name": "ADDRESS1",
-											"type": "UTF8"
-										},
-										"sink": {
-											"name": "Address",
-											"type": "nvarchar"
-										}
-									}
-								],
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "codeCountry",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "dwh_verkopen",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					},
-					{
-						"name": "mapping_country_code",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "mapping_country",
-								"type": "DataFlowReference",
-								"parameters": {
-									"go": "'go'"
-								},
-								"datasetParameters": {
-									"code": {},
-									"counrty": {},
-									"codeCounrty": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-11-06T14:14:15Z"
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/datasets/codeCountry')]",
-				"[concat(variables('workspaceId'), '/datasets/dwh_verkopen')]",
-				"[concat(variables('workspaceId'), '/dataflows/mapping_country')]"
 			]
 		},
 		{
