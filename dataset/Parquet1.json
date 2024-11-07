@@ -1,0 +1,34 @@
+{
+	"name": "Parquet1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dbo.anc_department.parquet",
+				"folderPath": "ANC",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "dept_id",
+				"type": "INT32"
+			},
+			{
+				"name": "dept_name",
+				"type": "UTF8"
+			},
+			{
+				"name": "dept_head_id",
+				"type": "INT32"
+			}
+		]
+	}
+}

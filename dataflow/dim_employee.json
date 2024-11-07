@@ -1,0 +1,146 @@
+{
+	"name": "dim_employee",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "go_sales_staff",
+						"type": "DatasetReference"
+					},
+					"name": "go"
+				},
+				{
+					"dataset": {
+						"referenceName": "anc_employee",
+						"type": "DatasetReference"
+					},
+					"name": "anc"
+				},
+				{
+					"dataset": {
+						"referenceName": "Parquet1",
+						"type": "DatasetReference"
+					},
+					"name": "ancDepartment"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "lsconnection",
+						"type": "LinkedServiceReference"
+					},
+					"name": "GoDimEmployee"
+				},
+				{
+					"linkedService": {
+						"referenceName": "lsconnection",
+						"type": "LinkedServiceReference"
+					},
+					"name": "ANCDimEmployee"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "mappingANC"
+				},
+				{
+					"name": "derivedColumn2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          SALES_STAFF_CODE as integer,",
+				"          FIRST_NAME as string,",
+				"          LAST_NAME as string,",
+				"          POSITION_EN as string,",
+				"          WORK_PHONE as string,",
+				"          EXTENSION as string,",
+				"          FAX as string,",
+				"          EMAIL as string,",
+				"          DATE_HIRED as timestamp,",
+				"          SALES_BRANCH_CODE as integer,",
+				"          MANAGER_CODE as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> go",
+				"source(output(",
+				"          emp_id as integer,",
+				"          manager_id as integer,",
+				"          emp_fname as string,",
+				"          emp_lname as string,",
+				"          dept_id as integer,",
+				"          street as string,",
+				"          city as string,",
+				"          state as string,",
+				"          zip_code as string,",
+				"          phone as string,",
+				"          status as string,",
+				"          ss_number as string,",
+				"          salary as decimal(18,0),",
+				"          start_date as timestamp,",
+				"          termination_date as string,",
+				"          birth_date as timestamp,",
+				"          bene_health_ins as string,",
+				"          bene_life_ins as string,",
+				"          bene_day_care as string,",
+				"          sex as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> anc",
+				"source(output(",
+				"          dept_id as integer,",
+				"          dept_name as string,",
+				"          dept_head_id as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> ancDepartment",
+				"go derive(EmployeeKey = concatWS(\"_\", toString(SALES_STAFF_CODE), \"GO\"),",
+				"          Department = '',",
+				"          Employeestatus = '',",
+				"          Enddate = '') ~> derivedColumn1",
+				"anc, ancDepartment join(anc@dept_id == ancDepartment@dept_id,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> mappingANC",
+				"mappingANC derive(EmployeeKey = concatWS('_', toString(emp_id), '_ANC')) ~> derivedColumn2",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     fileSystem: 'fsngroup6',",
+				"     folderPath: 'dim_goEmployee',",
+				"     truncate: true,",
+				"     compressionCodec: 'none',",
+				"     filePattern:'dim_go_employee_stagging.parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> GoDimEmployee",
+				"derivedColumn2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     fileSystem: 'fsngroup6',",
+				"     folderPath: 'dim_anc_employee',",
+				"     filePattern:'dim_anc_employee_stagging.parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> ANCDimEmployee"
+			]
+		}
+	}
+}
