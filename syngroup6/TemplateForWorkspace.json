@@ -1879,6 +1879,55 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/datalake_To_DWH_Fact_Inventory')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "mapping Fact Inventory",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Fact_Inventory",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"goInventoryLevel": {},
+									"ancProduct": {},
+									"dwhProduct": {},
+									"goProduct": {},
+									"GOINVENTORY": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/Fact_Inventory')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/sourceTdatalake_achrm')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
@@ -4308,6 +4357,63 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/dwh_dim_product')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ProductKey",
+						"type": "varchar"
+					},
+					{
+						"name": "ProductID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Productname",
+						"type": "varchar"
+					},
+					{
+						"name": "Producttype",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Productioncost",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Productcode",
+						"type": "varchar"
+					},
+					{
+						"name": "Productcatagory",
+						"type": "varchar"
+					},
+					{
+						"name": "Productdescription",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Dim_Product"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/DWH')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/dwh_fact_Salesorder')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -4721,6 +4827,49 @@
 					{
 						"name": "PRODUCT_TYPE_EN",
 						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/go_inventory_level')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dbo.go_INVENTORY_LEVELS.parquet",
+						"folderPath": "GO",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "INVENTORY_YEAR",
+						"type": "INT32"
+					},
+					{
+						"name": "INVENTORY_MONTH",
+						"type": "INT32"
+					},
+					{
+						"name": "PRODUCT_NUMBER",
+						"type": "INT32"
+					},
+					{
+						"name": "INVENTORY_COUNT",
+						"type": "INT32"
 					}
 				]
 			},
@@ -5222,6 +5371,164 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Fact_Inventory')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "go_inventory_level",
+								"type": "DatasetReference"
+							},
+							"name": "goInventoryLevel"
+						},
+						{
+							"dataset": {
+								"referenceName": "dim_anc_product",
+								"type": "DatasetReference"
+							},
+							"name": "ancProduct"
+						},
+						{
+							"dataset": {
+								"referenceName": "dwh_dim_product",
+								"type": "DatasetReference"
+							},
+							"name": "dwhProduct"
+						},
+						{
+							"dataset": {
+								"referenceName": "dim_go_product",
+								"type": "DatasetReference"
+							},
+							"name": "goProduct"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "lsconnection",
+								"type": "LinkedServiceReference"
+							},
+							"name": "GOINVENTORY"
+						}
+					],
+					"transformations": [
+						{
+							"name": "join1PRODUCT"
+						},
+						{
+							"name": "ADDKEY"
+						},
+						{
+							"name": "SINK"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          INVENTORY_YEAR as integer,",
+						"          INVENTORY_MONTH as integer,",
+						"          PRODUCT_NUMBER as integer,",
+						"          INVENTORY_COUNT as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> goInventoryLevel",
+						"source(output(",
+						"          id as integer,",
+						"          name as string,",
+						"          description as string,",
+						"          prod_size as string,",
+						"          color as string,",
+						"          quantity as integer,",
+						"          unit_price as decimal(18,0),",
+						"          picture_name as string,",
+						"          category as string,",
+						"          Source as string,",
+						"          ProductKey as string,",
+						"          ProductID as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> ancProduct",
+						"source(output(",
+						"          ProductKey as string,",
+						"          ProductID as integer,",
+						"          Productname as string,",
+						"          Producttype as integer,",
+						"          Productioncost as integer,",
+						"          Productcode as string,",
+						"          Productcatagory as string,",
+						"          Productdescription as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> dwhProduct",
+						"source(output(",
+						"          PRODUCT_NUMBER as integer,",
+						"          INTRODUCTION_DATE as timestamp,",
+						"          PRODUCT_TYPE_CODE as integer,",
+						"          PRODUCTION_COST as double,",
+						"          MARGIN as double,",
+						"          PRODUCT_IMAGE as string,",
+						"          PRODUCT_NAME as string,",
+						"          PRODUCT_LINE_CODE as integer,",
+						"          PRODUCT_TYPE_EN as string,",
+						"          Source as string,",
+						"          ProductID as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> goProduct",
+						"goInventoryLevel, goProduct join(goInventoryLevel@PRODUCT_NUMBER == goProduct@PRODUCT_NUMBER,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1PRODUCT",
+						"join1PRODUCT derive(InventorymanagementID = concatWS('_', concatWS('_', concatWS('_', toString(goInventoryLevel@PRODUCT_NUMBER), toString(INVENTORY_YEAR)), toString(INVENTORY_MONTH)),\"GO\"),",
+						"          TotalPrice = PRODUCTION_COST*INVENTORY_COUNT,",
+						"          Totalamount = INVENTORY_COUNT,",
+						"          Unitprice = PRODUCTION_COST) ~> ADDKEY",
+						"ADDKEY select(mapColumn(",
+						"          InventorymanagementID,",
+						"          TotalPrice,",
+						"          Totalamount,",
+						"          Unitprice",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SINK",
+						"SINK sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     fileSystem: 'fsngroup6',",
+						"     folderPath: 'Fact_inventory_go',",
+						"     truncate: true,",
+						"     compressionCodec: 'none',",
+						"     partitionFileNames:['fact_inventory.parquet'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> GOINVENTORY"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/go_inventory_level')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_anc_product')]",
+				"[concat(variables('workspaceId'), '/datasets/dwh_dim_product')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_go_product')]",
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/dim_employee')]",
