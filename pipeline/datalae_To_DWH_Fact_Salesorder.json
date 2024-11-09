@@ -5,8 +5,6 @@
 			{
 				"name": "mapping salesorde go",
 				"type": "ExecuteDataFlow",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -35,7 +33,7 @@
 				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
-						"activity": "mapping salesorde go",
+						"activity": "mapping salesorder anv",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -104,8 +102,8 @@
 							{
 								"source": {
 									"name": "CustomerID",
-									"type": "Int32",
-									"physicalType": "INT32"
+									"type": "String",
+									"physicalType": "UTF8"
 								},
 								"sink": {
 									"name": "DIM_CustomerCustomerKey",
@@ -127,7 +125,7 @@
 							},
 							{
 								"source": {
-									"name": "EmployeeID",
+									"name": "EmployeeKey",
 									"type": "String",
 									"physicalType": "UTF8"
 								},
@@ -157,8 +155,10 @@
 								},
 								"sink": {
 									"name": "LineTotal",
-									"type": "String",
-									"physicalType": "varchar"
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 18
 								}
 							},
 							{
@@ -169,8 +169,10 @@
 								},
 								"sink": {
 									"name": "UnitPrice",
-									"type": "String",
-									"physicalType": "varchar"
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 18
 								}
 							},
 							{
@@ -181,8 +183,10 @@
 								},
 								"sink": {
 									"name": "DiscountUnitPrice",
-									"type": "String",
-									"physicalType": "varchar"
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 18
 								}
 							},
 							{
@@ -193,8 +197,10 @@
 								},
 								"sink": {
 									"name": "ActualUnitPrice",
-									"type": "String",
-									"physicalType": "varchar"
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 18
 								}
 							}
 						],
@@ -221,7 +227,14 @@
 			{
 				"name": "mapping salesorder anv",
 				"type": "ExecuteDataFlow",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "mapping salesorde go",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -245,7 +258,16 @@
 			{
 				"name": "Copy fact salesorder ANC",
 				"type": "Copy",
-				"dependsOn": [],
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [
+					{
+						"activity": "mapping salesorder anv",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -357,15 +379,15 @@
 							{
 								"source": {
 									"name": "LineTotal",
-									"type": "Decimal",
-									"physicalType": "DECIMAL",
-									"scale": 0,
-									"precision": 29
+									"type": "Double",
+									"physicalType": "DOUBLE"
 								},
 								"sink": {
 									"name": "LineTotal",
-									"type": "String",
-									"physicalType": "varchar"
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 18
 								}
 							},
 							{
@@ -378,28 +400,38 @@
 								},
 								"sink": {
 									"name": "UnitPrice",
-									"type": "String",
-									"physicalType": "varchar"
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 18
 								}
 							},
 							{
 								"source": {
-									"name": "DiscountUnitPrice"
+									"name": "DiscountUnitPrice",
+									"type": "Double",
+									"physicalType": "DOUBLE"
 								},
 								"sink": {
 									"name": "DiscountUnitPrice",
-									"type": "String",
-									"physicalType": "varchar"
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 18
 								}
 							},
 							{
 								"source": {
-									"name": "ActualUnitPrice"
+									"name": "ActualUnitPrice",
+									"type": "Double",
+									"physicalType": "DOUBLE"
 								},
 								"sink": {
 									"name": "ActualUnitPrice",
-									"type": "String",
-									"physicalType": "varchar"
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 18
 								}
 							}
 						],
