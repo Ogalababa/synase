@@ -5,6 +5,8 @@
 			{
 				"name": "mapping salesorde go",
 				"type": "ExecuteDataFlow",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -29,6 +31,8 @@
 			{
 				"name": "Copy fact salesorder Go",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "mapping salesorde go",
@@ -237,6 +241,181 @@
 					},
 					"traceLevel": "Fine"
 				}
+			},
+			{
+				"name": "Copy fact salesorder ANC",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ParquetSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "ParquetReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "upsert",
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"SalesorderID"
+							]
+						},
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "SalesorderID",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "SalesorderID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "DIM_ProductProductKey",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "DIM_ProductProductKey",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "DIM_CustomerCustomerKey",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "DIM_CustomerCustomerKey",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "DIM_SalesLocation",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "DIM_SalesLocation",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "DIM_EmployeeEmployeekey",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "DIM_EmployeeEmployeekey",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "DIM_DateDateID",
+									"type": "Int32",
+									"physicalType": "INT32"
+								},
+								"sink": {
+									"name": "DIM_DateDateID",
+									"type": "Int64",
+									"physicalType": "bigint"
+								}
+							},
+							{
+								"source": {
+									"name": "LineTotal",
+									"type": "Decimal",
+									"physicalType": "DECIMAL",
+									"scale": 0,
+									"precision": 29
+								},
+								"sink": {
+									"name": "LineTotal",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "unit_price",
+									"type": "Decimal",
+									"physicalType": "DECIMAL",
+									"scale": 0,
+									"precision": 18
+								},
+								"sink": {
+									"name": "UnitPrice",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"sink": {
+									"name": "DiscountUnitPrice",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"sink": {
+									"name": "ActualUnitPrice",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "fact_salesorder_ANC",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "dwh_fact_salseorder",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
 		"annotations": []
