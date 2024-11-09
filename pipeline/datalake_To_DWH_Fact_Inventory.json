@@ -29,9 +29,14 @@
 			{
 				"name": "Copy data fact go",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "mapping Fact Inventory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -69,6 +74,11 @@
 						"type": "TabularTranslator",
 						"mappings": [
 							{
+								"source": {
+									"name": "DIM_DateID",
+									"type": "Int32",
+									"physicalType": "INT32"
+								},
 								"sink": {
 									"name": "DIM_DateID",
 									"type": "Int64",
@@ -76,6 +86,11 @@
 								}
 							},
 							{
+								"source": {
+									"name": "DIM_ProductProductID",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
 								"sink": {
 									"name": "DIM_ProductProductID",
 									"type": "String",
@@ -102,8 +117,8 @@
 								},
 								"sink": {
 									"name": "Totalprice",
-									"type": "Int32",
-									"physicalType": "int"
+									"type": "Double",
+									"physicalType": "float"
 								}
 							},
 							{
@@ -114,8 +129,8 @@
 								},
 								"sink": {
 									"name": "Totalamount",
-									"type": "Int32",
-									"physicalType": "int"
+									"type": "Double",
+									"physicalType": "float"
 								}
 							},
 							{
@@ -126,8 +141,8 @@
 								},
 								"sink": {
 									"name": "Unitprice",
-									"type": "Int32",
-									"physicalType": "int"
+									"type": "Double",
+									"physicalType": "float"
 								}
 							}
 						],
@@ -141,6 +156,150 @@
 				"inputs": [
 					{
 						"referenceName": "Parquet2",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "dwh_intvantory",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Copy data fact ANC",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy data fact go",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ParquetSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "ParquetReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "upsert",
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"InventorymanagementID"
+							]
+						},
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "DIM_DateID",
+									"type": "Int32",
+									"physicalType": "INT32"
+								},
+								"sink": {
+									"name": "DIM_DateID",
+									"type": "Int64",
+									"physicalType": "bigint"
+								}
+							},
+							{
+								"source": {
+									"name": "DIM_ProductProductID",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "DIM_ProductProductID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "InventorymanagementID",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "InventorymanagementID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "TotalPrice",
+									"type": "Decimal",
+									"physicalType": "DECIMAL",
+									"scale": 0,
+									"precision": 29
+								},
+								"sink": {
+									"name": "Totalprice",
+									"type": "Double",
+									"physicalType": "float"
+								}
+							},
+							{
+								"source": {
+									"name": "Totalamount",
+									"type": "Int32",
+									"physicalType": "INT32"
+								},
+								"sink": {
+									"name": "Totalamount",
+									"type": "Double",
+									"physicalType": "float"
+								}
+							},
+							{
+								"source": {
+									"name": "Unitprice",
+									"type": "Decimal",
+									"physicalType": "DECIMAL",
+									"scale": 0,
+									"precision": 18
+								},
+								"sink": {
+									"name": "Unitprice",
+									"type": "Double",
+									"physicalType": "float"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "fact_anc_int",
 						"type": "DatasetReference"
 					}
 				],

@@ -1,0 +1,50 @@
+{
+	"name": "fact_anc_int",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "fact_anc_inventory.parquet",
+				"folderPath": "fact_anc_inventory",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "InventorymanagementID",
+				"type": "UTF8"
+			},
+			{
+				"name": "TotalPrice",
+				"type": "DECIMAL",
+				"precision": 29,
+				"scale": 0
+			},
+			{
+				"name": "Totalamount",
+				"type": "INT32"
+			},
+			{
+				"name": "Unitprice",
+				"type": "DECIMAL",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "DIM_DateID",
+				"type": "INT32"
+			},
+			{
+				"name": "DIM_ProductProductID",
+				"type": "UTF8"
+			}
+		]
+	}
+}
