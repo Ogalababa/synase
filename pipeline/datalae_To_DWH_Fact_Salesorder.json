@@ -31,6 +31,8 @@
 			{
 				"name": "Copy fact salesorder Go",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "mapping salesorde go",
@@ -227,8 +229,6 @@
 			{
 				"name": "mapping salesorder anv",
 				"type": "ExecuteDataFlow",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "mapping salesorde go",
