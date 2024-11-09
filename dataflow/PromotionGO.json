@@ -64,7 +64,7 @@
 				"join1campaign derive(PROMOTIONID = concatWS('_', toString(PRODUCT_NUMBER), toString(DATE_START)),",
 				"          StartDate = toDate(DATE_START) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
 				"          EndDateID = toDate(DATE_END) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
-				"          ProductKeu = concatWS('_', toString(PRODUCT_NUMBER), 'GO')) ~> addColumns",
+				"          ProductKey = concatWS('_', toString(PRODUCT_NUMBER), 'GO')) ~> addColumns",
 				"addColumns sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'parquet',",
