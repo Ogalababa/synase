@@ -2256,9 +2256,16 @@
 						}
 					},
 					{
-						"name": "Copy data",
+						"name": "Copy promotion",
 						"type": "Copy",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "mapping promotion",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -2268,8 +2275,126 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"enableStaging": false
-						}
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"PromotionID"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "PROMOTIONID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "PromotionID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "DESCRIPTION",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Description",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "DISCOUNT",
+											"type": "Single",
+											"physicalType": "FLOAT"
+										},
+										"sink": {
+											"name": "Discount",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "StartDate",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "StartDate",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "EndDateID",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "EndDateID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "ProductKey",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "ProductID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "fact_promotion_go",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_promotion",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
 					}
 				],
 				"policy": {
@@ -2279,7 +2404,8 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/PromotionGO')]",
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+				"[concat(variables('workspaceId'), '/datasets/fact_promotion_go')]",
+				"[concat(variables('workspaceId'), '/datasets/DWH_promotion')]"
 			]
 		},
 		{
@@ -2934,6 +3060,55 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DWH_promotion')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "PromotionID",
+						"type": "varchar"
+					},
+					{
+						"name": "Description",
+						"type": "varchar"
+					},
+					{
+						"name": "Discount",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "StartDate",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "EndDateID",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "ProductID",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Fact_PromotionReview"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/DWH')]"
 			]
 		},
 		{
@@ -5174,6 +5349,69 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/fact_promotion_go')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Fact_Promotion_GO.parquet",
+						"folderPath": "Fact_Promotion_GO",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "PR_NUMBER",
+						"type": "INT32"
+					},
+					{
+						"name": "DATE_START",
+						"type": "INT96"
+					},
+					{
+						"name": "DATE_END",
+						"type": "INT96"
+					},
+					{
+						"name": "DESCRIPTION",
+						"type": "UTF8"
+					},
+					{
+						"name": "PRODUCT_NUMBER",
+						"type": "INT32"
+					},
+					{
+						"name": "DISCOUNT",
+						"type": "FLOAT"
+					},
+					{
+						"name": "PROMOTIONID",
+						"type": "UTF8"
+					},
+					{
+						"name": "StartDate",
+						"type": "INT32"
+					},
+					{
+						"name": "EndDateID",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/fact_salseorder')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -5929,7 +6167,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/PromotionGO')]",
+			"name": "[concat(parameters('workspaceName'), '/Dataflow1')]",
 			"type": "Microsoft.Synapse/workspaces/dataflows",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -6198,6 +6436,97 @@
 				"[concat(variables('workspaceId'), '/datasets/go_inventory_level')]",
 				"[concat(variables('workspaceId'), '/datasets/dim_anc_product')]",
 				"[concat(variables('workspaceId'), '/datasets/dim_go_product')]",
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PromotionGO')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "dim_go_promotion",
+								"type": "DatasetReference"
+							},
+							"name": "goPromotion"
+						},
+						{
+							"dataset": {
+								"referenceName": "go_Campaign",
+								"type": "DatasetReference"
+							},
+							"name": "goCampaign"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "lsconnection",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sinkFactPromotionReview"
+						}
+					],
+					"transformations": [
+						{
+							"name": "join1campaign"
+						},
+						{
+							"name": "addColumns"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          PR_NUMBER as integer,",
+						"          DATE_START as timestamp,",
+						"          DATE_END as timestamp,",
+						"          DESCRIPTION as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> goPromotion",
+						"source(output(",
+						"          PR_NUMBER as integer,",
+						"          PRODUCT_NUMBER as integer,",
+						"          DISCOUNT as float",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> goCampaign",
+						"goPromotion, goCampaign join(goPromotion@PR_NUMBER == goCampaign@PR_NUMBER,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1campaign",
+						"join1campaign derive(PROMOTIONID = concatWS('_', toString(PRODUCT_NUMBER), toString(toDate(DATE_START))),",
+						"          StartDate = toDate(DATE_START) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
+						"          EndDateID = toDate(DATE_END) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
+						"          ProductKey = concatWS('_', toString(PRODUCT_NUMBER), 'GO')) ~> addColumns",
+						"addColumns sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     fileSystem: 'fsngroup6',",
+						"     folderPath: 'Fact_Promotion_GO',",
+						"     truncate: true,",
+						"     compressionCodec: 'none',",
+						"     partitionFileNames:['Fact_Promotion_GO.parquet'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkFactPromotionReview"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/dim_go_promotion')]",
+				"[concat(variables('workspaceId'), '/datasets/go_Campaign')]",
 				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
 			]
 		},
