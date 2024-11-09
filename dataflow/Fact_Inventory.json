@@ -150,7 +150,7 @@
 				"selectfact sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'parquet',",
-				"     fileSystem: 'fsgroup6',",
+				"     fileSystem: 'fsngroup6',",
 				"     folderPath: 'fact_anc_inventory',",
 				"     truncate: true,",
 				"     compressionCodec: 'none',",
