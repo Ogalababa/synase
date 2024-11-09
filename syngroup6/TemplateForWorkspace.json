@@ -1916,6 +1916,24 @@
 							},
 							"traceLevel": "Fine"
 						}
+					},
+					{
+						"name": "Copy data fact go",
+						"type": "Copy",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"enableStaging": false
+						}
 					}
 				],
 				"policy": {
@@ -1924,7 +1942,8 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/dataflows/Fact_Inventory')]"
+				"[concat(variables('workspaceId'), '/dataflows/Fact_Inventory')]",
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
 			]
 		},
 		{
@@ -5526,7 +5545,7 @@
 						"selectfact sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
-						"     fileSystem: 'fsgroup6',",
+						"     fileSystem: 'fsngroup6',",
 						"     folderPath: 'fact_anc_inventory',",
 						"     truncate: true,",
 						"     compressionCodec: 'none',",
