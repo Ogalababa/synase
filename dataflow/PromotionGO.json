@@ -61,7 +61,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1campaign",
-				"join1campaign derive(PROMOTIONID = concatWS('_', toString(PRODUCT_NUMBER), toString(DATE_START)),",
+				"join1campaign derive(PROMOTIONID = concatWS('_', toString(PRODUCT_NUMBER), toString(toDate(DATE_START))),",
 				"          StartDate = toDate(DATE_START) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
 				"          EndDateID = toDate(DATE_END) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
 				"          ProductKey = concatWS('_', toString(PRODUCT_NUMBER), 'GO')) ~> addColumns",

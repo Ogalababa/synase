@@ -135,8 +135,7 @@
 							},
 							{
 								"source": {
-									"name": "PROMOTIONID",
-									"type": "String",
+									"name": "ProductKey",
 									"physicalType": "UTF8"
 								},
 								"sink": {
