@@ -269,8 +269,6 @@
 					{
 						"name": "mapping salesorde go",
 						"type": "ExecuteDataFlow",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -305,11 +303,9 @@
 					{
 						"name": "Copy fact salesorder Go",
 						"type": "Copy",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
-								"activity": "mapping salesorde go",
+								"activity": "mapping salesorder anv",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -378,8 +374,8 @@
 									{
 										"source": {
 											"name": "CustomerID",
-											"type": "Int32",
-											"physicalType": "INT32"
+											"type": "String",
+											"physicalType": "UTF8"
 										},
 										"sink": {
 											"name": "DIM_CustomerCustomerKey",
@@ -401,7 +397,7 @@
 									},
 									{
 										"source": {
-											"name": "EmployeeID",
+											"name": "EmployeeKey",
 											"type": "String",
 											"physicalType": "UTF8"
 										},
@@ -431,8 +427,10 @@
 										},
 										"sink": {
 											"name": "LineTotal",
-											"type": "String",
-											"physicalType": "varchar"
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 0,
+											"precision": 18
 										}
 									},
 									{
@@ -443,8 +441,10 @@
 										},
 										"sink": {
 											"name": "UnitPrice",
-											"type": "String",
-											"physicalType": "varchar"
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 0,
+											"precision": 18
 										}
 									},
 									{
@@ -455,8 +455,10 @@
 										},
 										"sink": {
 											"name": "DiscountUnitPrice",
-											"type": "String",
-											"physicalType": "varchar"
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 0,
+											"precision": 18
 										}
 									},
 									{
@@ -467,8 +469,10 @@
 										},
 										"sink": {
 											"name": "ActualUnitPrice",
-											"type": "String",
-											"physicalType": "varchar"
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 0,
+											"precision": 18
 										}
 									}
 								],
@@ -497,7 +501,14 @@
 					{
 						"name": "mapping salesorder anv",
 						"type": "ExecuteDataFlow",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "mapping salesorde go",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -530,6 +541,8 @@
 					{
 						"name": "Copy fact salesorder ANC",
 						"type": "Copy",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "mapping salesorder anv",
@@ -649,15 +662,15 @@
 									{
 										"source": {
 											"name": "LineTotal",
-											"type": "Decimal",
-											"physicalType": "DECIMAL",
-											"scale": 0,
-											"precision": 29
+											"type": "Double",
+											"physicalType": "DOUBLE"
 										},
 										"sink": {
 											"name": "LineTotal",
-											"type": "String",
-											"physicalType": "varchar"
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 0,
+											"precision": 18
 										}
 									},
 									{
@@ -670,28 +683,38 @@
 										},
 										"sink": {
 											"name": "UnitPrice",
-											"type": "String",
-											"physicalType": "varchar"
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 0,
+											"precision": 18
 										}
 									},
 									{
 										"source": {
-											"name": "DiscountUnitPrice"
+											"name": "DiscountUnitPrice",
+											"type": "Double",
+											"physicalType": "DOUBLE"
 										},
 										"sink": {
 											"name": "DiscountUnitPrice",
-											"type": "String",
-											"physicalType": "varchar"
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 0,
+											"precision": 18
 										}
 									},
 									{
 										"source": {
-											"name": "ActualUnitPrice"
+											"name": "ActualUnitPrice",
+											"type": "Double",
+											"physicalType": "DOUBLE"
 										},
 										"sink": {
 											"name": "ActualUnitPrice",
-											"type": "String",
-											"physicalType": "varchar"
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 0,
+											"precision": 18
 										}
 									}
 								],
@@ -728,7 +751,6 @@
 				"[concat(variables('workspaceId'), '/datasets/fact_salseorder')]",
 				"[concat(variables('workspaceId'), '/datasets/dwh_fact_salseorder')]",
 				"[concat(variables('workspaceId'), '/dataflows/salesorder anc')]",
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
 				"[concat(variables('workspaceId'), '/datasets/fact_salesorder_ANC')]"
 			]
 		},
