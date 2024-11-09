@@ -105,7 +105,14 @@
 					{
 						"name": "Copy dwh salary",
 						"type": "Copy",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "Data salary",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -115,8 +122,131 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"enableStaging": false
-						}
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"SalarypaymentID"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "SalarypaymentID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "SalarypaymentID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "LocationID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "DIM_LocationLocationID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "EmployeelID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "DIM_EmployeeEmployeekey",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "DateID",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "DIM_DateDateID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "salary",
+											"type": "Decimal",
+											"physicalType": "DECIMAL",
+											"scale": 5,
+											"precision": 15
+										},
+										"sink": {
+											"name": "Salary",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 0,
+											"precision": 18
+										}
+									},
+									{
+										"source": {
+											"name": "Bonus"
+										},
+										"sink": {
+											"name": "Bonus",
+											"type": "Decimal",
+											"physicalType": "decimal",
+											"scale": 0,
+											"precision": 18
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "dwh_fact_salary",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "dwh_salary",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
 					}
 				],
 				"policy": {
@@ -126,7 +256,8 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/mapping salary')]",
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+				"[concat(variables('workspaceId'), '/datasets/dwh_fact_salary')]",
+				"[concat(variables('workspaceId'), '/datasets/dwh_salary')]"
 			]
 		},
 		{
@@ -5316,6 +5447,61 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/dwh_fact_salary')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "fact_salary_ANC.parquet",
+						"folderPath": "fact_salary_ANC",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "salary",
+						"type": "DECIMAL",
+						"precision": 15,
+						"scale": 5
+					},
+					{
+						"name": "bonus_amount",
+						"type": "DECIMAL",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "SalarypaymentID",
+						"type": "UTF8"
+					},
+					{
+						"name": "LocationID",
+						"type": "UTF8"
+					},
+					{
+						"name": "DateID",
+						"type": "INT32"
+					},
+					{
+						"name": "EmployeelID",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/dwh_fact_salseorder')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -5454,6 +5640,55 @@
 				"typeProperties": {
 					"schema": "dbo",
 					"table": "FACT_Inventorymanagement"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/DWH')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dwh_salary')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "SalarypaymentID",
+						"type": "varchar"
+					},
+					{
+						"name": "DIM_LocationLocationID",
+						"type": "varchar"
+					},
+					{
+						"name": "DIM_EmployeeEmployeekey",
+						"type": "varchar"
+					},
+					{
+						"name": "DIM_DateDateID",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "Salary",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Bonus",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "FACT_Salarypayment"
 				}
 			},
 			"dependsOn": [
@@ -7159,14 +7394,15 @@
 						"select1bonus derive(SalarypaymentID = concatWS('_', concatWS('_', toString(emp_id), toString(toDate(start_date))), toString(toDate(bonus_date))),",
 						"          LocationID = concatWS('_', toString(emp_id), '_ANC_EMPLOYEE'),",
 						"          DateID = toDate(iif(isNull(bonus_date), start_date, bonus_date)) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
-						"          EmployeelID = concatWS('_', toString(emp_id), 'ANC')) ~> addColumns",
+						"          EmployeelID = concatWS('_', toString(emp_id), 'ANC'),",
+						"          Bonus = iif(isNull(bonus_amount), toDecimal(0), bonus_amount)) ~> addColumns",
 						"addColumns select(mapColumn(",
 						"          salary,",
-						"          bonus_amount,",
 						"          SalarypaymentID,",
 						"          LocationID,",
 						"          DateID,",
-						"          EmployeelID",
+						"          EmployeelID,",
+						"          Bonus",
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select1",
