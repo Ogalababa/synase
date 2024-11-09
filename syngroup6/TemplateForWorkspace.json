@@ -66,6 +66,70 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('workspaceName'), '/data_To_DWH_Fact_Salary')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data salary",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "mapping salary",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"achrmEmployee": {},
+									"achrmBonus": {},
+									"factSalary": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "Copy dwh salary",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"enableStaging": false
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/mapping salary')]",
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/datalae_To_DWH_Fact_Salesorder')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
@@ -3758,6 +3822,156 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/db_achrm_bonus')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sourcedb",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "emp_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "bonus_date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "bonus_amount",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 0
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "achrm_bonus"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/sourcedb')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/db_anchrm')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sourcedb",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "emp_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "manager_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "emp_fname",
+						"type": "varchar"
+					},
+					{
+						"name": "emp_lname",
+						"type": "varchar"
+					},
+					{
+						"name": "dept_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "street",
+						"type": "varchar"
+					},
+					{
+						"name": "city",
+						"type": "varchar"
+					},
+					{
+						"name": "state",
+						"type": "varchar"
+					},
+					{
+						"name": "zip_code",
+						"type": "varchar"
+					},
+					{
+						"name": "phone",
+						"type": "varchar"
+					},
+					{
+						"name": "status",
+						"type": "varchar"
+					},
+					{
+						"name": "ss_number",
+						"type": "varchar"
+					},
+					{
+						"name": "salary",
+						"type": "decimal",
+						"precision": 15,
+						"scale": 5
+					},
+					{
+						"name": "start_date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "termination_date",
+						"type": "varchar"
+					},
+					{
+						"name": "birth_date",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "bene_health_ins",
+						"type": "varchar"
+					},
+					{
+						"name": "bene_life_ins",
+						"type": "varchar"
+					},
+					{
+						"name": "bene_day_care",
+						"type": "varchar"
+					},
+					{
+						"name": "sex",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "achrm_employee"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/sourcedb')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/db_go_order_details')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -6846,6 +7060,140 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/mapping salary')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "db_anchrm",
+								"type": "DatasetReference"
+							},
+							"name": "achrmEmployee"
+						},
+						{
+							"dataset": {
+								"referenceName": "db_achrm_bonus",
+								"type": "DatasetReference"
+							},
+							"name": "achrmBonus"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "lsconnection",
+								"type": "LinkedServiceReference"
+							},
+							"name": "factSalary"
+						}
+					],
+					"transformations": [
+						{
+							"name": "join1bonus"
+						},
+						{
+							"name": "select1bonus"
+						},
+						{
+							"name": "addColumns"
+						},
+						{
+							"name": "select1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          emp_id as integer,",
+						"          manager_id as integer,",
+						"          emp_fname as string,",
+						"          emp_lname as string,",
+						"          dept_id as integer,",
+						"          street as string,",
+						"          city as string,",
+						"          state as string,",
+						"          zip_code as string,",
+						"          phone as string,",
+						"          status as string,",
+						"          ss_number as string,",
+						"          salary as decimal(15,5),",
+						"          start_date as timestamp,",
+						"          termination_date as string,",
+						"          birth_date as timestamp,",
+						"          bene_health_ins as string,",
+						"          bene_life_ins as string,",
+						"          bene_day_care as string,",
+						"          sex as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> achrmEmployee",
+						"source(output(",
+						"          emp_id as integer,",
+						"          bonus_date as timestamp,",
+						"          bonus_amount as decimal(18,0)",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> achrmBonus",
+						"achrmEmployee, achrmBonus join(achrmEmployee@emp_id == achrmBonus@emp_id,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1bonus",
+						"join1bonus select(mapColumn(",
+						"          emp_id = achrmEmployee@emp_id,",
+						"          dept_id,",
+						"          salary,",
+						"          start_date,",
+						"          bonus_date,",
+						"          bonus_amount",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1bonus",
+						"select1bonus derive(SalarypaymentID = concatWS('_', concatWS('_', toString(emp_id), toString(toDate(start_date))), toString(toDate(bonus_date))),",
+						"          LocationID = concatWS('_', toString(emp_id), '_ANC_EMPLOYEE'),",
+						"          DateID = toDate(iif(isNull(bonus_date), start_date, bonus_date)) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
+						"          EmployeelID = concatWS('_', toString(emp_id), 'ANC')) ~> addColumns",
+						"addColumns select(mapColumn(",
+						"          salary,",
+						"          bonus_amount,",
+						"          SalarypaymentID,",
+						"          LocationID,",
+						"          DateID,",
+						"          EmployeelID",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"select1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     fileSystem: 'fsngroup6',",
+						"     folderPath: 'fact_salary_ANC',",
+						"     truncate: true,",
+						"     compressionCodec: 'none',",
+						"     partitionFileNames:['fact_salary_ANC.parquet'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> factSalary"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/db_anchrm')]",
+				"[concat(variables('workspaceId'), '/datasets/db_achrm_bonus')]",
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/mapping_country')]",
 			"type": "Microsoft.Synapse/workspaces/dataflows",
 			"apiVersion": "2019-06-01-preview",
@@ -7334,18 +7682,6 @@
 			"properties": {
 				"type": "ManagedIdentity",
 				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/data_To_DWH_Fact_Salary')]",
-			"type": "Microsoft.Synapse/workspaces/pipelines",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": []
 			},
 			"dependsOn": []
 		}
