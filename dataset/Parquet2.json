@@ -1,0 +1,38 @@
+{
+	"name": "Parquet2",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "fact_inventory.parquet",
+				"folderPath": "Fact_inventory_go",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "InventorymanagementID",
+				"type": "UTF8"
+			},
+			{
+				"name": "TotalPrice",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "Totalamount",
+				"type": "INT32"
+			},
+			{
+				"name": "Unitprice",
+				"type": "DOUBLE"
+			}
+		]
+	}
+}
