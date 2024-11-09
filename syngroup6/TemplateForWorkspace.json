@@ -1932,8 +1932,119 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"enableStaging": false
-						}
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"InventorymanagementID"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {},
+										"sink": {
+											"name": "DIM_DateID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {},
+										"sink": {
+											"name": "DIM_ProductProductID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "InventorymanagementID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "InventorymanagementID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "TotalPrice",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										},
+										"sink": {
+											"name": "Totalprice",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Totalamount",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "Totalamount",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Unitprice",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										},
+										"sink": {
+											"name": "Unitprice",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Parquet2",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "dwh_intvantory",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
 					}
 				],
 				"policy": {
@@ -1943,7 +2054,9 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/Fact_Inventory')]",
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
+				"[concat(variables('workspaceId'), '/datasets/Parquet2')]",
+				"[concat(variables('workspaceId'), '/datasets/dwh_intvantory')]"
 			]
 		},
 		{
@@ -2738,6 +2851,49 @@
 					{
 						"name": "dept_head_id",
 						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Parquet2')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "fact_inventory.parquet",
+						"folderPath": "Fact_inventory_go",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "InventorymanagementID",
+						"type": "UTF8"
+					},
+					{
+						"name": "TotalPrice",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "Totalamount",
+						"type": "INT32"
+					},
+					{
+						"name": "Unitprice",
+						"type": "DOUBLE"
 					}
 				]
 			},
@@ -4629,6 +4785,27 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/dwh_intvantory')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DWH",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "FACT_Inventorymanagement"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/DWH')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/dwh_verkopen')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -5508,24 +5685,32 @@
 						"join1PRODUCT derive(InventorymanagementID = concatWS('_', concatWS('_', concatWS('_', toString(goInventoryLevel@PRODUCT_NUMBER), toString(INVENTORY_YEAR)), toString(INVENTORY_MONTH)),\"GO\"),",
 						"          TotalPrice = PRODUCTION_COST*INVENTORY_COUNT,",
 						"          Totalamount = INVENTORY_COUNT,",
-						"          Unitprice = PRODUCTION_COST) ~> ADDKEY",
+						"          Unitprice = PRODUCTION_COST,",
+						"          DateID = toDate(INTRODUCTION_DATE) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
+						"          DIM_Product = concatWS('_', ProductID, \"GO\")) ~> ADDKEY",
 						"ADDKEY select(mapColumn(",
 						"          InventorymanagementID,",
 						"          TotalPrice,",
 						"          Totalamount,",
-						"          Unitprice",
+						"          Unitprice,",
+						"          DIM_DateID = DateID,",
+						"          DIM_ProductProductID = DIM_Product",
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> SINK",
 						"ancProduct derive(InventorymanagementID = concatWS('_', toString(id), \"ANC\"),",
 						"          TotalPrice = unit_price*quantity,",
 						"          Totalamount = quantity,",
-						"          Unitprice = unit_price) ~> ancIntventory",
+						"          Unitprice = unit_price,",
+						"          DIM_DateID = 7305,",
+						"          DIM_ProductProductID = ProductKey) ~> ancIntventory",
 						"ancIntventory select(mapColumn(",
 						"          InventorymanagementID,",
 						"          TotalPrice,",
 						"          Totalamount,",
-						"          Unitprice",
+						"          Unitprice,",
+						"          DIM_DateID,",
+						"          DIM_ProductProductID",
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> selectfact",
