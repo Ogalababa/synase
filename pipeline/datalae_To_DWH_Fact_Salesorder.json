@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "mapping Salarypayment",
+				"name": "mapping salesorde go",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -31,7 +31,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "mapping Salarypayment",
+						"activity": "mapping salesorde go",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -213,6 +213,30 @@
 						"type": "DatasetReference"
 					}
 				]
+			},
+			{
+				"name": "mapping salesorder anv",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "salesorder anc",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
 			}
 		],
 		"annotations": []

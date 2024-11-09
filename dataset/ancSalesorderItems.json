@@ -1,0 +1,42 @@
+{
+	"name": "ancSalesorderItems",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dbo.anc_sales_order_item.parquet",
+				"folderPath": "ANC",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "id",
+				"type": "INT32"
+			},
+			{
+				"name": "line_id",
+				"type": "INT32"
+			},
+			{
+				"name": "prod_id",
+				"type": "INT32"
+			},
+			{
+				"name": "quantity",
+				"type": "INT32"
+			},
+			{
+				"name": "ship_date",
+				"type": "INT96"
+			}
+		]
+	}
+}

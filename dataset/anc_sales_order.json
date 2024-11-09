@@ -1,0 +1,46 @@
+{
+	"name": "anc_sales_order",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dbo.anc_sales_order.parquet",
+				"folderPath": "ANC",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "id",
+				"type": "INT32"
+			},
+			{
+				"name": "cust_id",
+				"type": "INT32"
+			},
+			{
+				"name": "order_date",
+				"type": "INT96"
+			},
+			{
+				"name": "fin_code_id",
+				"type": "UTF8"
+			},
+			{
+				"name": "region",
+				"type": "UTF8"
+			},
+			{
+				"name": "sales_rep",
+				"type": "INT32"
+			}
+		]
+	}
+}

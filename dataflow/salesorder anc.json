@@ -1,0 +1,181 @@
+{
+	"name": "salesorder anc",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "anc_sales_order",
+						"type": "DatasetReference"
+					},
+					"name": "ancSalesorder"
+				},
+				{
+					"dataset": {
+						"referenceName": "ancSalesorderItems",
+						"type": "DatasetReference"
+					},
+					"name": "ancSalesorderItems"
+				},
+				{
+					"dataset": {
+						"referenceName": "anc_Product",
+						"type": "DatasetReference"
+					},
+					"name": "ancProduct"
+				},
+				{
+					"dataset": {
+						"referenceName": "anc_customer",
+						"type": "DatasetReference"
+					},
+					"name": "ancCustomerDiscount"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "lsconnection",
+						"type": "LinkedServiceReference"
+					},
+					"name": "factSalesorderANC"
+				}
+			],
+			"transformations": [
+				{
+					"name": "join1product"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "join1salesorder"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "addColumns"
+				},
+				{
+					"name": "join1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id as integer,",
+				"          cust_id as integer,",
+				"          order_date as timestamp,",
+				"          fin_code_id as string,",
+				"          region as string,",
+				"          sales_rep as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> ancSalesorder",
+				"source(output(",
+				"          id as integer,",
+				"          line_id as integer,",
+				"          prod_id as integer,",
+				"          quantity as integer,",
+				"          ship_date as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> ancSalesorderItems",
+				"source(output(",
+				"          id as integer,",
+				"          name as string,",
+				"          description as string,",
+				"          prod_size as string,",
+				"          color as string,",
+				"          quantity as integer,",
+				"          unit_price as decimal(18,0),",
+				"          picture_name as string,",
+				"          category as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> ancProduct",
+				"source(output(",
+				"          id as integer,",
+				"          fname as string,",
+				"          lname as string,",
+				"          address as string,",
+				"          city as string,",
+				"          state as string,",
+				"          zip as string,",
+				"          phone as string,",
+				"          company_name as string,",
+				"          type as string,",
+				"          discount as integer,",
+				"          max_quantity_order as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> ancCustomerDiscount",
+				"ancSalesorderItems, ancProduct join(prod_id == ancProduct@id,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1product",
+				"join1product select(mapColumn(",
+				"          SalesorderID = ancSalesorderItems@id,",
+				"          ProductID = prod_id,",
+				"          quantity = ancSalesorderItems@quantity,",
+				"          unit_price",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1, ancSalesorder join(SalesorderID == id,",
+				"     joinType:'right',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1salesorder",
+				"join1 select(mapColumn(",
+				"          SalesorderID,",
+				"          ProductID,",
+				"          quantity,",
+				"          unit_price,",
+				"          cust_id,",
+				"          order_date,",
+				"          sales_rep,",
+				"          discount",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 derive(SalesorderID = concatWS('_', concatWS('_', toString(SalesorderID), toString(ProductID)), toString(sales_rep)),",
+				"          DIM_ProductProductKey = concatWS('_',toString(ProductID),'ANC'),",
+				"          DIM_CustomerCustomerKey = concatWS('_',toString(cust_id),'ANC'),",
+				"          DIM_SalesLocation = concatWS('_',toString(cust_id),'ANC'),",
+				"          DIM_EmployeeEmployeekey = concatWS('_',toString(sales_rep),'ANC'),",
+				"          DIM_DateDateID = toDate(order_date) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
+				"          LineTotal = quantity*unit_price) ~> addColumns",
+				"join1salesorder, ancCustomerDiscount join(cust_id == ancCustomerDiscount@id,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"addColumns sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     fileSystem: 'fsngroup6',",
+				"     folderPath: 'fact_SalesorderANC',",
+				"     truncate: true,",
+				"     compressionCodec: 'none',",
+				"     partitionFileNames:['fact_SalesorderANC。'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> factSalesorderANC"
+			]
+		}
+	}
+}
