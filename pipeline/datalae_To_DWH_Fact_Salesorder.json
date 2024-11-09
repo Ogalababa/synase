@@ -383,6 +383,9 @@
 								}
 							},
 							{
+								"source": {
+									"name": "DiscountUnitPrice"
+								},
 								"sink": {
 									"name": "DiscountUnitPrice",
 									"type": "String",
@@ -390,6 +393,9 @@
 								}
 							},
 							{
+								"source": {
+									"name": "ActualUnitPrice"
+								},
 								"sink": {
 									"name": "ActualUnitPrice",
 									"type": "String",
