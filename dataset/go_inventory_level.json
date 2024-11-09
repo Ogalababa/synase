@@ -1,0 +1,38 @@
+{
+	"name": "go_inventory_level",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dbo.go_INVENTORY_LEVELS.parquet",
+				"folderPath": "GO",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "INVENTORY_YEAR",
+				"type": "INT32"
+			},
+			{
+				"name": "INVENTORY_MONTH",
+				"type": "INT32"
+			},
+			{
+				"name": "PRODUCT_NUMBER",
+				"type": "INT32"
+			},
+			{
+				"name": "INVENTORY_COUNT",
+				"type": "INT32"
+			}
+		]
+	}
+}
