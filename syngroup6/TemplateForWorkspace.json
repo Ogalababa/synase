@@ -1904,9 +1904,9 @@
 								"datasetParameters": {
 									"goInventoryLevel": {},
 									"ancProduct": {},
-									"dwhProduct": {},
 									"goProduct": {},
-									"GOINVENTORY": {}
+									"GOINVENTORY": {},
+									"factIntventoryANC": {}
 								}
 							},
 							"staging": {},
@@ -5396,13 +5396,6 @@
 						},
 						{
 							"dataset": {
-								"referenceName": "dwh_dim_product",
-								"type": "DatasetReference"
-							},
-							"name": "dwhProduct"
-						},
-						{
-							"dataset": {
 								"referenceName": "dim_go_product",
 								"type": "DatasetReference"
 							},
@@ -5416,6 +5409,13 @@
 								"type": "LinkedServiceReference"
 							},
 							"name": "GOINVENTORY"
+						},
+						{
+							"linkedService": {
+								"referenceName": "lsconnection",
+								"type": "LinkedServiceReference"
+							},
+							"name": "factIntventoryANC"
 						}
 					],
 					"transformations": [
@@ -5427,6 +5427,12 @@
 						},
 						{
 							"name": "SINK"
+						},
+						{
+							"name": "ancIntventory"
+						},
+						{
+							"name": "selectfact"
 						}
 					],
 					"scriptLines": [
@@ -5458,20 +5464,6 @@
 						"     validateSchema: false,",
 						"     ignoreNoFilesFound: false,",
 						"     format: 'parquet') ~> ancProduct",
-						"source(output(",
-						"          ProductKey as string,",
-						"          ProductID as integer,",
-						"          Productname as string,",
-						"          Producttype as integer,",
-						"          Productioncost as integer,",
-						"          Productcode as string,",
-						"          Productcatagory as string,",
-						"          Productdescription as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     isolationLevel: 'READ_UNCOMMITTED',",
-						"     format: 'table') ~> dwhProduct",
 						"source(output(",
 						"          PRODUCT_NUMBER as integer,",
 						"          INTRODUCTION_DATE as timestamp,",
@@ -5506,6 +5498,18 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> SINK",
+						"ancProduct derive(InventorymanagementID = concatWS('_', toString(id), \"ANC\"),",
+						"          TotalPrice = unit_price*quantity,",
+						"          Totalamount = quantity,",
+						"          Unitprice = unit_price) ~> ancIntventory",
+						"ancIntventory select(mapColumn(",
+						"          InventorymanagementID,",
+						"          TotalPrice,",
+						"          Totalamount,",
+						"          Unitprice",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectfact",
 						"SINK sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
@@ -5518,14 +5522,27 @@
 						"     preCommands: [],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> GOINVENTORY"
+						"     skipDuplicateMapOutputs: true) ~> GOINVENTORY",
+						"selectfact sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     fileSystem: 'fsgroup6',",
+						"     folderPath: 'fact_anc_inventory',",
+						"     truncate: true,",
+						"     compressionCodec: 'none',",
+						"     partitionFileNames:['fact_anc_inventory.parquet'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> factIntventoryANC"
 					]
 				}
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/datasets/go_inventory_level')]",
 				"[concat(variables('workspaceId'), '/datasets/dim_anc_product')]",
-				"[concat(variables('workspaceId'), '/datasets/dwh_dim_product')]",
 				"[concat(variables('workspaceId'), '/datasets/dim_go_product')]",
 				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
 			]
