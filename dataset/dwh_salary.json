@@ -1,0 +1,44 @@
+{
+	"name": "dwh_salary",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DWH",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "SalarypaymentID",
+				"type": "varchar"
+			},
+			{
+				"name": "DIM_LocationLocationID",
+				"type": "varchar"
+			},
+			{
+				"name": "DIM_EmployeeEmployeekey",
+				"type": "varchar"
+			},
+			{
+				"name": "DIM_DateDateID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "Salary",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Bonus",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "FACT_Salarypayment"
+		}
+	}
+}

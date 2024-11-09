@@ -1,0 +1,50 @@
+{
+	"name": "dwh_fact_salary",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "fact_salary_ANC.parquet",
+				"folderPath": "fact_salary_ANC",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "salary",
+				"type": "DECIMAL",
+				"precision": 15,
+				"scale": 5
+			},
+			{
+				"name": "bonus_amount",
+				"type": "DECIMAL",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "SalarypaymentID",
+				"type": "UTF8"
+			},
+			{
+				"name": "LocationID",
+				"type": "UTF8"
+			},
+			{
+				"name": "DateID",
+				"type": "INT32"
+			},
+			{
+				"name": "EmployeelID",
+				"type": "UTF8"
+			}
+		]
+	}
+}
