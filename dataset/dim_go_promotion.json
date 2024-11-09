@@ -1,0 +1,38 @@
+{
+	"name": "dim_go_promotion",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dbo.go_PROMOTION.parquet",
+				"folderPath": "GO",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "PR_NUMBER",
+				"type": "INT32"
+			},
+			{
+				"name": "DATE_START",
+				"type": "INT96"
+			},
+			{
+				"name": "DATE_END",
+				"type": "INT96"
+			},
+			{
+				"name": "DESCRIPTION",
+				"type": "UTF8"
+			}
+		]
+	}
+}

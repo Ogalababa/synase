@@ -1,0 +1,34 @@
+{
+	"name": "go_Campaign",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dbo.go_CAMPAIGN.parquet",
+				"folderPath": "GO",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "PR_NUMBER",
+				"type": "INT32"
+			},
+			{
+				"name": "PRODUCT_NUMBER",
+				"type": "INT32"
+			},
+			{
+				"name": "DISCOUNT",
+				"type": "FLOAT"
+			}
+		]
+	}
+}
