@@ -1,0 +1,44 @@
+{
+	"name": "DWH_promotion",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DWH",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "PromotionID",
+				"type": "varchar"
+			},
+			{
+				"name": "Description",
+				"type": "varchar"
+			},
+			{
+				"name": "Discount",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "StartDate",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "EndDateID",
+				"type": "bigint",
+				"precision": 19
+			},
+			{
+				"name": "ProductID",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Fact_PromotionReview"
+		}
+	}
+}

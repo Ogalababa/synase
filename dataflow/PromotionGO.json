@@ -1,0 +1,84 @@
+{
+	"name": "PromotionGO",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "dim_go_promotion",
+						"type": "DatasetReference"
+					},
+					"name": "goPromotion"
+				},
+				{
+					"dataset": {
+						"referenceName": "go_Campaign",
+						"type": "DatasetReference"
+					},
+					"name": "goCampaign"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "lsconnection",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkFactPromotionReview"
+				}
+			],
+			"transformations": [
+				{
+					"name": "join1campaign"
+				},
+				{
+					"name": "addColumns"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          PR_NUMBER as integer,",
+				"          DATE_START as timestamp,",
+				"          DATE_END as timestamp,",
+				"          DESCRIPTION as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> goPromotion",
+				"source(output(",
+				"          PR_NUMBER as integer,",
+				"          PRODUCT_NUMBER as integer,",
+				"          DISCOUNT as float",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> goCampaign",
+				"goPromotion, goCampaign join(goPromotion@PR_NUMBER == goCampaign@PR_NUMBER,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1campaign",
+				"join1campaign derive(PROMOTIONID = concatWS('_', toString(PRODUCT_NUMBER), toString(DATE_START)),",
+				"          StartDate = toDate(DATE_START) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
+				"          EndDateID = toDate(DATE_END) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
+				"          ProductKeu = concatWS('_', toString(PRODUCT_NUMBER), 'GO')) ~> addColumns",
+				"addColumns sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     fileSystem: 'fsngroup6',",
+				"     folderPath: 'Fact_Promotion_GO',",
+				"     truncate: true,",
+				"     compressionCodec: 'none',",
+				"     partitionFileNames:['Fact_Promotion_GO.parquet'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkFactPromotionReview"
+			]
+		}
+	}
+}

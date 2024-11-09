@@ -1,0 +1,58 @@
+{
+	"name": "fact_promotion_go",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "Fact_Promotion_GO.parquet",
+				"folderPath": "Fact_Promotion_GO",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "PR_NUMBER",
+				"type": "INT32"
+			},
+			{
+				"name": "DATE_START",
+				"type": "INT96"
+			},
+			{
+				"name": "DATE_END",
+				"type": "INT96"
+			},
+			{
+				"name": "DESCRIPTION",
+				"type": "UTF8"
+			},
+			{
+				"name": "PRODUCT_NUMBER",
+				"type": "INT32"
+			},
+			{
+				"name": "DISCOUNT",
+				"type": "FLOAT"
+			},
+			{
+				"name": "PROMOTIONID",
+				"type": "UTF8"
+			},
+			{
+				"name": "StartDate",
+				"type": "INT32"
+			},
+			{
+				"name": "EndDateID",
+				"type": "INT32"
+			}
+		]
+	}
+}
