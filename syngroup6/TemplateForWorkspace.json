@@ -267,7 +267,7 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "mapping Salarypayment",
+						"name": "mapping salesorde go",
 						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
@@ -305,12 +305,228 @@
 						"type": "Copy",
 						"dependsOn": [
 							{
-								"activity": "mapping Salarypayment",
+								"activity": "mapping salesorde go",
 								"dependencyConditions": [
 									"Succeeded"
 								]
 							}
 						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"SalesorderID"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "SalesorderID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "SalesorderID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ProductID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "DIM_ProductProductKey",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CustomerID",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "DIM_CustomerCustomerKey",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "LocationID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "DIM_SalesLocation",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "EmployeeID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "DIM_EmployeeEmployeekey",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "DateID",
+											"type": "Int32",
+											"physicalType": "INT32"
+										},
+										"sink": {
+											"name": "DIM_DateDateID",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "LineTotal",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										},
+										"sink": {
+											"name": "LineTotal",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "UNIT_PRICE",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										},
+										"sink": {
+											"name": "UnitPrice",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "DiscountUnitPrice",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										},
+										"sink": {
+											"name": "DiscountUnitPrice",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ActualUnitPrice",
+											"type": "Double",
+											"physicalType": "DOUBLE"
+										},
+										"sink": {
+											"name": "ActualUnitPrice",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "fact_salseorder",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "dwh_fact_salseorder",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "mapping salesorder anv",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "salesorder anc",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"ancSalesorder": {},
+									"ancSalesorderItems": {},
+									"ancProduct": {},
+									"ancCustomerDiscount": {},
+									"factSalesorderANC": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "Copy fact salesorder ANC",
+						"type": "Copy",
+						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -499,7 +715,9 @@
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/mapping_fact_salesorder')]",
 				"[concat(variables('workspaceId'), '/datasets/fact_salseorder')]",
-				"[concat(variables('workspaceId'), '/datasets/dwh_fact_salseorder')]"
+				"[concat(variables('workspaceId'), '/datasets/dwh_fact_salseorder')]",
+				"[concat(variables('workspaceId'), '/dataflows/salesorder anc')]",
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
 			]
 		},
 		{
@@ -3647,6 +3865,118 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/ancSalesorderItems')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dbo.anc_sales_order_item.parquet",
+						"folderPath": "ANC",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "id",
+						"type": "INT32"
+					},
+					{
+						"name": "line_id",
+						"type": "INT32"
+					},
+					{
+						"name": "prod_id",
+						"type": "INT32"
+					},
+					{
+						"name": "quantity",
+						"type": "INT32"
+					},
+					{
+						"name": "ship_date",
+						"type": "INT96"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/anc_Product')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dbo.anc_product.parquet",
+						"folderPath": "ANC",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "id",
+						"type": "INT32"
+					},
+					{
+						"name": "name",
+						"type": "UTF8"
+					},
+					{
+						"name": "description",
+						"type": "UTF8"
+					},
+					{
+						"name": "prod_size",
+						"type": "UTF8"
+					},
+					{
+						"name": "color",
+						"type": "UTF8"
+					},
+					{
+						"name": "quantity",
+						"type": "INT32"
+					},
+					{
+						"name": "unit_price",
+						"type": "DECIMAL",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "picture_name",
+						"type": "UTF8"
+					},
+					{
+						"name": "category",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/anc_customer')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -3823,6 +4153,57 @@
 					{
 						"name": "sex",
 						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/anc_sales_order')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dbo.anc_sales_order.parquet",
+						"folderPath": "ANC",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "id",
+						"type": "INT32"
+					},
+					{
+						"name": "cust_id",
+						"type": "INT32"
+					},
+					{
+						"name": "order_date",
+						"type": "INT96"
+					},
+					{
+						"name": "fin_code_id",
+						"type": "UTF8"
+					},
+					{
+						"name": "region",
+						"type": "UTF8"
+					},
+					{
+						"name": "sales_rep",
+						"type": "INT32"
 					}
 				]
 			},
@@ -7908,6 +8289,196 @@
 				"[concat(variables('workspaceId'), '/datasets/dwh_anc_employee')]",
 				"[concat(variables('workspaceId'), '/datasets/db_go_order_details')]",
 				"[concat(variables('workspaceId'), '/datasets/go_order_header')]",
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/salesorder anc')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "anc_sales_order",
+								"type": "DatasetReference"
+							},
+							"name": "ancSalesorder"
+						},
+						{
+							"dataset": {
+								"referenceName": "ancSalesorderItems",
+								"type": "DatasetReference"
+							},
+							"name": "ancSalesorderItems"
+						},
+						{
+							"dataset": {
+								"referenceName": "anc_Product",
+								"type": "DatasetReference"
+							},
+							"name": "ancProduct"
+						},
+						{
+							"dataset": {
+								"referenceName": "anc_customer",
+								"type": "DatasetReference"
+							},
+							"name": "ancCustomerDiscount"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "lsconnection",
+								"type": "LinkedServiceReference"
+							},
+							"name": "factSalesorderANC"
+						}
+					],
+					"transformations": [
+						{
+							"name": "join1product"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "join1salesorder"
+						},
+						{
+							"name": "select2"
+						},
+						{
+							"name": "addColumns"
+						},
+						{
+							"name": "join1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          id as integer,",
+						"          cust_id as integer,",
+						"          order_date as timestamp,",
+						"          fin_code_id as string,",
+						"          region as string,",
+						"          sales_rep as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> ancSalesorder",
+						"source(output(",
+						"          id as integer,",
+						"          line_id as integer,",
+						"          prod_id as integer,",
+						"          quantity as integer,",
+						"          ship_date as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> ancSalesorderItems",
+						"source(output(",
+						"          id as integer,",
+						"          name as string,",
+						"          description as string,",
+						"          prod_size as string,",
+						"          color as string,",
+						"          quantity as integer,",
+						"          unit_price as decimal(18,0),",
+						"          picture_name as string,",
+						"          category as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> ancProduct",
+						"source(output(",
+						"          id as integer,",
+						"          fname as string,",
+						"          lname as string,",
+						"          address as string,",
+						"          city as string,",
+						"          state as string,",
+						"          zip as string,",
+						"          phone as string,",
+						"          company_name as string,",
+						"          type as string,",
+						"          discount as integer,",
+						"          max_quantity_order as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> ancCustomerDiscount",
+						"ancSalesorderItems, ancProduct join(prod_id == ancProduct@id,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1product",
+						"join1product select(mapColumn(",
+						"          SalesorderID = ancSalesorderItems@id,",
+						"          ProductID = prod_id,",
+						"          quantity = ancSalesorderItems@quantity,",
+						"          unit_price",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"select1, ancSalesorder join(SalesorderID == id,",
+						"     joinType:'right',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1salesorder",
+						"join1 select(mapColumn(",
+						"          SalesorderID,",
+						"          ProductID,",
+						"          quantity,",
+						"          unit_price,",
+						"          cust_id,",
+						"          order_date,",
+						"          sales_rep,",
+						"          discount",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select2",
+						"select2 derive(SalesorderID = concatWS('_', concatWS('_', toString(SalesorderID), toString(ProductID)), toString(sales_rep)),",
+						"          DIM_ProductProductKey = concatWS('_',toString(ProductID),'ANC'),",
+						"          DIM_CustomerCustomerKey = concatWS('_',toString(cust_id),'ANC'),",
+						"          DIM_SalesLocation = concatWS('_',toString(cust_id),'ANC'),",
+						"          DIM_EmployeeEmployeekey = concatWS('_',toString(sales_rep),'ANC'),",
+						"          DIM_DateDateID = toDate(order_date) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
+						"          LineTotal = quantity*unit_price) ~> addColumns",
+						"join1salesorder, ancCustomerDiscount join(cust_id == ancCustomerDiscount@id,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1",
+						"addColumns sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     fileSystem: 'fsngroup6',",
+						"     folderPath: 'fact_SalesorderANC',",
+						"     truncate: true,",
+						"     compressionCodec: 'none',",
+						"     partitionFileNames:['fact_SalesorderANC。'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> factSalesorderANC"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/anc_sales_order')]",
+				"[concat(variables('workspaceId'), '/datasets/ancSalesorderItems')]",
+				"[concat(variables('workspaceId'), '/datasets/anc_Product')]",
+				"[concat(variables('workspaceId'), '/datasets/anc_customer')]",
 				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
 			]
 		},
