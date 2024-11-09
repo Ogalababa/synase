@@ -1,5 +1,5 @@
 {
-	"name": "Dataflow1",
+	"name": "factCampaign",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
