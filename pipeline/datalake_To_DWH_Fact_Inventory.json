@@ -29,6 +29,8 @@
 			{
 				"name": "Copy data fact go",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -52,12 +54,83 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"writeBehavior": "insert",
-						"sqlWriterUseTableLock": false
+						"writeBehavior": "upsert",
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"InventorymanagementID"
+							]
+						},
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
 					"translator": {
 						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"sink": {
+									"name": "DIM_DateID",
+									"type": "Int64",
+									"physicalType": "bigint"
+								}
+							},
+							{
+								"sink": {
+									"name": "DIM_ProductProductID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "InventorymanagementID",
+									"type": "String",
+									"physicalType": "UTF8"
+								},
+								"sink": {
+									"name": "InventorymanagementID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "TotalPrice",
+									"type": "Double",
+									"physicalType": "DOUBLE"
+								},
+								"sink": {
+									"name": "Totalprice",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "Totalamount",
+									"type": "Int32",
+									"physicalType": "INT32"
+								},
+								"sink": {
+									"name": "Totalamount",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "Unitprice",
+									"type": "Double",
+									"physicalType": "DOUBLE"
+								},
+								"sink": {
+									"name": "Unitprice",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							}
+						],
 						"typeConversion": true,
 						"typeConversionSettings": {
 							"allowDataTruncation": true,
@@ -74,39 +147,6 @@
 				"outputs": [
 					{
 						"referenceName": "dwh_intvantory",
-						"type": "DatasetReference"
-					}
-				]
-			},
-			{
-				"name": "Copy data fact anc",
-				"type": "Copy",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "ParquetSource",
-						"storeSettings": {
-							"type": "AzureBlobFSReadSettings",
-							"recursive": true,
-							"enablePartitionDiscovery": false
-						},
-						"formatSettings": {
-							"type": "ParquetReadSettings"
-						}
-					},
-					"enableStaging": false
-				},
-				"inputs": [
-					{
-						"referenceName": "Parquet2",
 						"type": "DatasetReference"
 					}
 				]
