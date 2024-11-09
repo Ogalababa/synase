@@ -269,6 +269,8 @@
 					{
 						"name": "mapping salesorde go",
 						"type": "ExecuteDataFlow",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -303,6 +305,8 @@
 					{
 						"name": "Copy fact salesorder Go",
 						"type": "Copy",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "mapping salesorde go",
@@ -526,7 +530,14 @@
 					{
 						"name": "Copy fact salesorder ANC",
 						"type": "Copy",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "mapping salesorder anv",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -577,7 +588,7 @@
 									},
 									{
 										"source": {
-											"name": "ProductID",
+											"name": "DIM_ProductProductKey",
 											"type": "String",
 											"physicalType": "UTF8"
 										},
@@ -589,9 +600,9 @@
 									},
 									{
 										"source": {
-											"name": "CustomerID",
-											"type": "Int32",
-											"physicalType": "INT32"
+											"name": "DIM_CustomerCustomerKey",
+											"type": "String",
+											"physicalType": "UTF8"
 										},
 										"sink": {
 											"name": "DIM_CustomerCustomerKey",
@@ -601,7 +612,7 @@
 									},
 									{
 										"source": {
-											"name": "LocationID",
+											"name": "DIM_SalesLocation",
 											"type": "String",
 											"physicalType": "UTF8"
 										},
@@ -613,7 +624,7 @@
 									},
 									{
 										"source": {
-											"name": "EmployeeID",
+											"name": "DIM_EmployeeEmployeekey",
 											"type": "String",
 											"physicalType": "UTF8"
 										},
@@ -625,7 +636,7 @@
 									},
 									{
 										"source": {
-											"name": "DateID",
+											"name": "DIM_DateDateID",
 											"type": "Int32",
 											"physicalType": "INT32"
 										},
@@ -638,8 +649,10 @@
 									{
 										"source": {
 											"name": "LineTotal",
-											"type": "Double",
-											"physicalType": "DOUBLE"
+											"type": "Decimal",
+											"physicalType": "DECIMAL",
+											"scale": 0,
+											"precision": 29
 										},
 										"sink": {
 											"name": "LineTotal",
@@ -649,9 +662,11 @@
 									},
 									{
 										"source": {
-											"name": "UNIT_PRICE",
-											"type": "Double",
-											"physicalType": "DOUBLE"
+											"name": "unit_price",
+											"type": "Decimal",
+											"physicalType": "DECIMAL",
+											"scale": 0,
+											"precision": 18
 										},
 										"sink": {
 											"name": "UnitPrice",
@@ -661,9 +676,7 @@
 									},
 									{
 										"source": {
-											"name": "DiscountUnitPrice",
-											"type": "Double",
-											"physicalType": "DOUBLE"
+											"name": "DiscountUnitPrice"
 										},
 										"sink": {
 											"name": "DiscountUnitPrice",
@@ -673,9 +686,7 @@
 									},
 									{
 										"source": {
-											"name": "ActualUnitPrice",
-											"type": "Double",
-											"physicalType": "DOUBLE"
+											"name": "ActualUnitPrice"
 										},
 										"sink": {
 											"name": "ActualUnitPrice",
@@ -693,7 +704,7 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "fact_salseorder",
+								"referenceName": "fact_salesorder_ANC",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -717,7 +728,8 @@
 				"[concat(variables('workspaceId'), '/datasets/fact_salseorder')]",
 				"[concat(variables('workspaceId'), '/datasets/dwh_fact_salseorder')]",
 				"[concat(variables('workspaceId'), '/dataflows/salesorder anc')]",
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
+				"[concat(variables('workspaceId'), '/datasets/fact_salesorder_ANC')]"
 			]
 		},
 		{
@@ -6242,6 +6254,47 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/fact_salesorder_ANC')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "fact_SalesorderANC.parquet",
+						"folderPath": "fact_SalesorderANC",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "emp_id",
+						"type": "INT32"
+					},
+					{
+						"name": "bonus_date",
+						"type": "INT96"
+					},
+					{
+						"name": "bonus_amount",
+						"type": "DECIMAL",
+						"precision": 18,
+						"scale": 0
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/fact_salseorder')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -8451,7 +8504,9 @@
 						"          DIM_SalesLocation = concatWS('_',toString(cust_id),'ANC'),",
 						"          DIM_EmployeeEmployeekey = concatWS('_',toString(sales_rep),'ANC'),",
 						"          DIM_DateDateID = toDate(order_date) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
-						"          LineTotal = quantity*unit_price) ~> addColumns",
+						"          LineTotal = quantity*(unit_price-unit_price*(discount*0.01)),",
+						"          DiscountUnitPrice = unit_price*(discount*0.01),",
+						"          ActualUnitPrice = unit_price-unit_price*(discount*0.01)) ~> addColumns",
 						"join1salesorder, ancCustomerDiscount join(cust_id == ancCustomerDiscount@id,",
 						"     joinType:'left',",
 						"     matchType:'exact',",
@@ -8464,7 +8519,7 @@
 						"     folderPath: 'fact_SalesorderANC',",
 						"     truncate: true,",
 						"     compressionCodec: 'none',",
-						"     partitionFileNames:['fact_SalesorderANC。'],",
+						"     partitionFileNames:['fact_SalesorderANC.parquet'],",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
