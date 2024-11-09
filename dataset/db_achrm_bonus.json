@@ -1,0 +1,34 @@
+{
+	"name": "db_achrm_bonus",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "sourcedb",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "emp_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "bonus_date",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "bonus_amount",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "achrm_bonus"
+		}
+	}
+}

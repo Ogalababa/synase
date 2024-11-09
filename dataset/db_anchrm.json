@@ -1,0 +1,106 @@
+{
+	"name": "db_anchrm",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "sourcedb",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "emp_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "manager_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "emp_fname",
+				"type": "varchar"
+			},
+			{
+				"name": "emp_lname",
+				"type": "varchar"
+			},
+			{
+				"name": "dept_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "street",
+				"type": "varchar"
+			},
+			{
+				"name": "city",
+				"type": "varchar"
+			},
+			{
+				"name": "state",
+				"type": "varchar"
+			},
+			{
+				"name": "zip_code",
+				"type": "varchar"
+			},
+			{
+				"name": "phone",
+				"type": "varchar"
+			},
+			{
+				"name": "status",
+				"type": "varchar"
+			},
+			{
+				"name": "ss_number",
+				"type": "varchar"
+			},
+			{
+				"name": "salary",
+				"type": "decimal",
+				"precision": 15,
+				"scale": 5
+			},
+			{
+				"name": "start_date",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "termination_date",
+				"type": "varchar"
+			},
+			{
+				"name": "birth_date",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "bene_health_ins",
+				"type": "varchar"
+			},
+			{
+				"name": "bene_life_ins",
+				"type": "varchar"
+			},
+			{
+				"name": "bene_day_care",
+				"type": "varchar"
+			},
+			{
+				"name": "sex",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "achrm_employee"
+		}
+	}
+}
