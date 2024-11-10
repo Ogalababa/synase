@@ -781,8 +781,8 @@
 								"parameters": {},
 								"datasetParameters": {
 									"goCustomer": {},
-									"source1": {},
-									"source2": {},
+									"dimLocation": {},
+									"ancCustomer": {},
 									"dimGoCustomer": {},
 									"sink1": {}
 								}
@@ -8532,14 +8532,14 @@
 								"referenceName": "dwh_dim_location",
 								"type": "DatasetReference"
 							},
-							"name": "source1"
+							"name": "dimLocation"
 						},
 						{
 							"dataset": {
 								"referenceName": "anc_customer",
 								"type": "DatasetReference"
 							},
-							"name": "source2"
+							"name": "ancCustomer"
 						}
 					],
 					"sinks": [
@@ -8593,7 +8593,7 @@
 						"     allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     isolationLevel: 'READ_UNCOMMITTED',",
-						"     format: 'table') ~> source1",
+						"     format: 'table') ~> dimLocation",
 						"source(output(",
 						"          id as integer,",
 						"          fname as string,",
@@ -8611,19 +8611,19 @@
 						"     allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     ignoreNoFilesFound: false,",
-						"     format: 'parquet') ~> source2",
+						"     format: 'parquet') ~> ancCustomer",
 						"goCustomer derive(CustomerKey = concatWS('_', toString(RETAILER_CODE), \"GO\"),",
-						"          CustomerLocation = concatWS('_', toString(RETAILER_CODE), \"GO\"),",
+						"          CustomerLocation = concatWS('_', toString(RETAILER_CODE), \"GO_Retailer\"),",
 						"          Discount = 0,",
 						"          Name = '') ~> derivedColumn1",
-						"source1, derivedColumn1 join(LocationID == CustomerLocation,",
+						"dimLocation, derivedColumn1 join(LocationID == CustomerLocation,",
 						"     joinType:'left',",
 						"     matchType:'exact',",
 						"     ignoreSpaces: false,",
 						"     broadcast: 'auto')~> join1",
-						"source2 derive(CustomerKey = concatWS('_', toString(id), 'ANC')) ~> derivedColumn2",
-						"derivedColumn2, source1 join(CustomerKey == LocationID,",
-						"     joinType:'inner',",
+						"ancCustomer derive(CustomerKey = concatWS('_', toString(id), 'ANC')) ~> derivedColumn2",
+						"derivedColumn2, dimLocation join(concatWS('_',CustomerKey,'_Customer') == LocationID,",
+						"     joinType:'left',",
 						"     matchType:'exact',",
 						"     ignoreSpaces: false,",
 						"     broadcast: 'auto')~> join2",
