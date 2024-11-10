@@ -32,8 +32,6 @@
 			{
 				"name": "Copy go  employee location",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "mapping_dim_Location",
@@ -162,11 +160,9 @@
 			{
 				"name": "Copy anc customer location",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
-						"activity": "Copy go  employee location",
+						"activity": "mapping_dim_Location",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -292,11 +288,9 @@
 			{
 				"name": "Copy anc employee",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
-						"activity": "Copy anc customer location",
+						"activity": "mapping_dim_Location",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -408,7 +402,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "dim_anc_employee",
+						"referenceName": "dimAncEmployeeLocation",
 						"type": "DatasetReference"
 					}
 				],
@@ -422,9 +416,14 @@
 			{
 				"name": "Copy go customer location",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "mapping_dim_Location",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -476,8 +475,7 @@
 							{
 								"source": {
 									"name": "ADDRESS1",
-									"type": "String",
-									"physicalType": "UTF8"
+									"type": "UTF8"
 								},
 								"sink": {
 									"name": "Adress",
@@ -488,8 +486,7 @@
 							{
 								"source": {
 									"name": "CITY",
-									"type": "String",
-									"physicalType": "UTF8"
+									"type": "UTF8"
 								},
 								"sink": {
 									"name": "City",
@@ -500,8 +497,7 @@
 							{
 								"source": {
 									"name": "COUNTRY",
-									"type": "String",
-									"physicalType": "UTF8"
+									"type": "UTF8"
 								},
 								"sink": {
 									"name": "Country",
@@ -512,8 +508,7 @@
 							{
 								"source": {
 									"name": "REGION",
-									"type": "String",
-									"physicalType": "UTF8"
+									"type": "UTF8"
 								},
 								"sink": {
 									"name": "State",
@@ -531,7 +526,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "dim_go_location_salesbranch",
+						"referenceName": "dim_go_customer_location",
 						"type": "DatasetReference"
 					}
 				],

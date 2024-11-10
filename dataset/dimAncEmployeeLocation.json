@@ -1,0 +1,42 @@
+{
+	"name": "dimAncEmployeeLocation",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dim_anc_employee_location.parquet",
+				"folderPath": "dim_anc_employee_location",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "emp_id",
+				"type": "INT32"
+			},
+			{
+				"name": "street",
+				"type": "UTF8"
+			},
+			{
+				"name": "city",
+				"type": "UTF8"
+			},
+			{
+				"name": "state",
+				"type": "UTF8"
+			},
+			{
+				"name": "LocationID",
+				"type": "UTF8"
+			}
+		]
+	}
+}
