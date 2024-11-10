@@ -87,7 +87,7 @@
 							},
 							{
 								"source": {
-									"name": "RETAILER_CODE",
+									"name": "RETAILER_SITE_CODE",
 									"type": "Int32",
 									"physicalType": "INT32"
 								},
@@ -99,7 +99,7 @@
 							},
 							{
 								"source": {
-									"name": "LocationID",
+									"name": "CustomerLocation",
 									"type": "String",
 									"physicalType": "UTF8"
 								},
@@ -124,8 +124,8 @@
 							{
 								"source": {
 									"name": "Discount",
-									"type": "String",
-									"physicalType": "UTF8"
+									"type": "Int32",
+									"physicalType": "INT32"
 								},
 								"sink": {
 									"name": "Discount",
@@ -135,8 +135,7 @@
 							},
 							{
 								"source": {
-									"name": "COMPANY_NAME",
-									"type": "String",
+									"name": "CompanyName",
 									"physicalType": "UTF8"
 								},
 								"sink": {
