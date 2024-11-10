@@ -1,5 +1,5 @@
 {
-	"name": "dim_go_location",
+	"name": "dim_go_location_salesbranch",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "lsconnection",
@@ -10,8 +10,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "dim_go_location_stagging-00001.parquet",
-				"folderPath": "dim_go_location",
+				"fileName": "dim_go_location_salesbranch.parquet",
+				"folderPath": "dim_go_location_salesbranch",
 				"fileSystem": "fsngroup6"
 			},
 			"compressionCodec": "snappy"

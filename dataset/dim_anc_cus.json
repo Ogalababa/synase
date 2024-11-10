@@ -10,8 +10,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "dim_anc_Cus_location_stagging-00001.parquet",
-				"folderPath": "dimAncCustomer",
+				"fileName": "dimAncCustomerLocation.parquet",
+				"folderPath": "dimAncCustomerLocation",
 				"fileSystem": "fsngroup6"
 			},
 			"compressionCodec": "snappy"
