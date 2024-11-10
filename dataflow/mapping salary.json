@@ -94,7 +94,7 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1bonus",
 				"select1bonus derive(SalarypaymentID = concatWS('_', concatWS('_', toString(emp_id), toString(toDate(start_date))), toString(toDate(bonus_date))),",
-				"          LocationID = concatWS('_', toString(emp_id), '_ANC_EMPLOYEE'),",
+				"          LocationID = concatWS('_', toString(emp_id), 'ANC','Employee'),",
 				"          DateID = toDate(iif(isNull(bonus_date), start_date, bonus_date)) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
 				"          EmployeelID = concatWS('_', toString(emp_id), 'ANC'),",
 				"          Bonus = iif(isNull(bonus_amount), toDecimal(0), bonus_amount)) ~> addColumns",
