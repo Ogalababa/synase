@@ -1140,8 +1140,6 @@
 					{
 						"name": "Copy go  employee location",
 						"type": "Copy",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "mapping_dim_Location",
@@ -1272,11 +1270,9 @@
 					{
 						"name": "Copy anc customer location",
 						"type": "Copy",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
-								"activity": "Copy go  employee location",
+								"activity": "mapping_dim_Location",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -1404,11 +1400,9 @@
 					{
 						"name": "Copy anc employee",
 						"type": "Copy",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
-								"activity": "Copy anc customer location",
+								"activity": "mapping_dim_Location",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -1520,7 +1514,7 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "dim_anc_employee",
+								"referenceName": "dimAncEmployeeLocation",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -1536,9 +1530,14 @@
 					{
 						"name": "Copy go customer location",
 						"type": "Copy",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "mapping_dim_Location",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -1590,8 +1589,7 @@
 									{
 										"source": {
 											"name": "ADDRESS1",
-											"type": "String",
-											"physicalType": "UTF8"
+											"type": "UTF8"
 										},
 										"sink": {
 											"name": "Adress",
@@ -1602,8 +1600,7 @@
 									{
 										"source": {
 											"name": "CITY",
-											"type": "String",
-											"physicalType": "UTF8"
+											"type": "UTF8"
 										},
 										"sink": {
 											"name": "City",
@@ -1614,8 +1611,7 @@
 									{
 										"source": {
 											"name": "COUNTRY",
-											"type": "String",
-											"physicalType": "UTF8"
+											"type": "UTF8"
 										},
 										"sink": {
 											"name": "Country",
@@ -1626,8 +1622,7 @@
 									{
 										"source": {
 											"name": "REGION",
-											"type": "String",
-											"physicalType": "UTF8"
+											"type": "UTF8"
 										},
 										"sink": {
 											"name": "State",
@@ -1645,7 +1640,7 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "dim_go_location_salesbranch",
+								"referenceName": "dim_go_customer_location",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -1667,11 +1662,11 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/mapping_country')]",
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
 				"[concat(variables('workspaceId'), '/datasets/dim_go_location_salesbranch')]",
 				"[concat(variables('workspaceId'), '/datasets/dwh_dim_location')]",
 				"[concat(variables('workspaceId'), '/datasets/dim_anc_cus')]",
-				"[concat(variables('workspaceId'), '/datasets/dim_anc_employee')]"
+				"[concat(variables('workspaceId'), '/datasets/dimAncEmployeeLocation')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_go_customer_location')]"
 			]
 		},
 		{
@@ -4815,6 +4810,53 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/dimAncEmployeeLocation')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dim_anc_employee_location.parquet",
+						"folderPath": "dim_anc_employee_location",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "emp_id",
+						"type": "INT32"
+					},
+					{
+						"name": "street",
+						"type": "UTF8"
+					},
+					{
+						"name": "city",
+						"type": "UTF8"
+					},
+					{
+						"name": "state",
+						"type": "UTF8"
+					},
+					{
+						"name": "LocationID",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/dim_ANC_customer2')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -5418,6 +5460,77 @@
 					},
 					{
 						"name": "Discount",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/lsconnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dim_go_customer_location')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "lsconnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "dimGOLocationRetailer.parquet",
+						"folderPath": "dimGOLocationRetailer",
+						"fileSystem": "fsngroup6"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "RETAILER_SITE_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "ADDRESS1",
+						"type": "UTF8"
+					},
+					{
+						"name": "ADDRESS2",
+						"type": "UTF8"
+					},
+					{
+						"name": "CITY",
+						"type": "UTF8"
+					},
+					{
+						"name": "REGION",
+						"type": "UTF8"
+					},
+					{
+						"name": "POSTAL_ZONE",
+						"type": "UTF8"
+					},
+					{
+						"name": "COUNTRY_CODE",
+						"type": "INT32"
+					},
+					{
+						"name": "ACTIVE_INDICATOR",
+						"type": "BOOLEAN"
+					},
+					{
+						"name": "COUNTRY",
+						"type": "UTF8"
+					},
+					{
+						"name": "LANGUAGE",
+						"type": "UTF8"
+					},
+					{
+						"name": "LocationID",
 						"type": "UTF8"
 					}
 				]
@@ -8329,7 +8442,9 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select1Location",
-						"select1Location derive(LocationID = concatWS('_', toString(emp_id), 'ANC_Employee')) ~> addIDs",
+						"select1Location derive(LocationID = concatWS('_', toString(emp_id), 'ANC_Employee'),",
+						"          Adress2 = '',",
+						"          Country = '') ~> addIDs",
 						"mappingDimLoacation sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
