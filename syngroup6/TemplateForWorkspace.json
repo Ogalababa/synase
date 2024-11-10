@@ -256,6 +256,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/mapping salary')]",
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
 				"[concat(variables('workspaceId'), '/datasets/dwh_fact_salary')]",
 				"[concat(variables('workspaceId'), '/datasets/dwh_salary')]"
 			]
@@ -501,8 +502,6 @@
 					{
 						"name": "mapping salesorder anv",
 						"type": "ExecuteDataFlow",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "mapping salesorde go",
@@ -543,8 +542,6 @@
 					{
 						"name": "Copy fact salesorder ANC",
 						"type": "Copy",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "mapping salesorder anv",
@@ -942,7 +939,7 @@
 						"type": "Copy",
 						"dependsOn": [
 							{
-								"activity": "Copy go customer",
+								"activity": "mapping customer",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -1891,7 +1888,7 @@
 						"type": "Copy",
 						"dependsOn": [
 							{
-								"activity": "Copy dim_go_employee",
+								"activity": "mappingDimEmployee",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -2286,7 +2283,7 @@
 						"type": "Copy",
 						"dependsOn": [
 							{
-								"activity": "to_dwh_dim_product_go",
+								"activity": "mapping_Dim_product",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -2644,7 +2641,7 @@
 						"type": "Copy",
 						"dependsOn": [
 							{
-								"activity": "Copy data fact go",
+								"activity": "mapping Fact Inventory",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -5427,7 +5424,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "dim_go_customer_stagging-00001.parquet",
+						"fileName": "dim_go_customer.parquet",
 						"folderPath": "dim_go_customer",
 						"fileSystem": "fsngroup6"
 					},
@@ -8563,7 +8560,7 @@
 							"name": "derivedColumn1"
 						},
 						{
-							"name": "join1"
+							"name": "joinLocationGo"
 						},
 						{
 							"name": "derivedColumn2"
@@ -8617,29 +8614,30 @@
 						"          Discount = 0,",
 						"          Name = '') ~> derivedColumn1",
 						"dimLocation, derivedColumn1 join(LocationID == CustomerLocation,",
-						"     joinType:'right',",
+						"     joinType:'inner',",
 						"     matchType:'exact',",
 						"     ignoreSpaces: false,",
-						"     broadcast: 'auto')~> join1",
+						"     broadcast: 'auto')~> joinLocationGo",
 						"ancCustomer derive(CustomerKey = concatWS('_', toString(id), 'ANC')) ~> derivedColumn2",
 						"derivedColumn2, dimLocation join(concatWS('_',CustomerKey,'Customer') == LocationID,",
 						"     joinType:'left',",
 						"     matchType:'exact',",
 						"     ignoreSpaces: false,",
 						"     broadcast: 'auto')~> join2",
-						"join1 sink(allowSchemaDrift: true,",
+						"joinLocationGo sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
 						"     fileSystem: 'fsngroup6',",
 						"     folderPath: 'dim_go_customer',",
 						"     truncate: true,",
 						"     compressionCodec: 'none',",
-						"     filePattern:'dim_go_customer_stagging.parquet',",
+						"     partitionFileNames:['dim_go_customer.parquet'],",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> dimGoCustomer",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> dimGoCustomer",
 						"join2 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
@@ -8996,7 +8994,7 @@
 						"select2 derive(SalesorderID = concatWS('_', concatWS('_', toString(SalesorderID), toString(ProductID)), toString(sales_rep)),",
 						"          DIM_ProductProductKey = concatWS('_',toString(ProductID),'ANC'),",
 						"          DIM_CustomerCustomerKey = concatWS('_',toString(cust_id),'ANC'),",
-						"          DIM_SalesLocation = concatWS('_',toString(cust_id),'ANC'),",
+						"          DIM_SalesLocation = concatWS('_',toString(cust_id),'ANC','Customer'),",
 						"          DIM_EmployeeEmployeekey = concatWS('_',toString(sales_rep),'ANC'),",
 						"          DIM_DateDateID = toDate(order_date) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
 						"          LineTotal = quantity*(unit_price-unit_price*(discount*0.01)),",
