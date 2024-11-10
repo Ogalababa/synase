@@ -6,7 +6,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "dim_go_RETAILER_stagging",
+						"referenceName": "dbGoRetailerSite",
 						"type": "DatasetReference"
 					},
 					"name": "goCustomer"
@@ -58,10 +58,14 @@
 			],
 			"scriptLines": [
 				"source(output(",
-				"          RETAILER_CODE as integer,",
-				"          RETAILER_CODEMR as integer,",
-				"          COMPANY_NAME as string,",
-				"          RETAILER_TYPE_CODE as integer",
+				"          RETAILER_SITE_CODE as integer,",
+				"          ADDRESS1 as string,",
+				"          ADDRESS2 as string,",
+				"          CITY as string,",
+				"          REGION as string,",
+				"          POSTAL_ZONE as string,",
+				"          COUNTRY_CODE as integer,",
+				"          ACTIVE_INDICATOR as boolean",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
@@ -96,8 +100,8 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     format: 'parquet') ~> ancCustomer",
-				"goCustomer derive(CustomerKey = concatWS('_', toString(RETAILER_CODE), \"GO\"),",
-				"          CustomerLocation = concatWS('_', toString(RETAILER_CODE), \"GO_Retailer\"),",
+				"goCustomer derive(CustomerKey = concatWS('_', toString(RETAILER_SITE_CODE), \"GO\"),",
+				"          CustomerLocation = concatWS('_', toString(RETAILER_SITE_CODE), \"GO_Retailer\"),",
 				"          Discount = 0,",
 				"          Name = '') ~> derivedColumn1",
 				"dimLocation, derivedColumn1 join(LocationID == CustomerLocation,",
