@@ -210,7 +210,7 @@
 				"     folderPath: 'dim_go_location_salesbranch',",
 				"     truncate: true,",
 				"     compressionCodec: 'none',",
-				"     partitionFileNames:['dim_go_location_salesbranch'],",
+				"     partitionFileNames:['dim_go_location_salesbranch.parquet'],",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
