@@ -155,7 +155,7 @@
 				"select2 derive(SalesorderID = concatWS('_', concatWS('_', toString(SalesorderID), toString(ProductID)), toString(sales_rep)),",
 				"          DIM_ProductProductKey = concatWS('_',toString(ProductID),'ANC'),",
 				"          DIM_CustomerCustomerKey = concatWS('_',toString(cust_id),'ANC'),",
-				"          DIM_SalesLocation = concatWS('_',toString(cust_id),'ANC'),",
+				"          DIM_SalesLocation = concatWS('_',toString(cust_id),'ANC','Customer'),",
 				"          DIM_EmployeeEmployeekey = concatWS('_',toString(sales_rep),'ANC'),",
 				"          DIM_DateDateID = toDate(order_date) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
 				"          LineTotal = quantity*(unit_price-unit_price*(discount*0.01)),",

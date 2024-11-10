@@ -193,7 +193,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "to_dwh_dim_product_go",
+						"activity": "mapping_Dim_product",
 						"dependencyConditions": [
 							"Succeeded"
 						]

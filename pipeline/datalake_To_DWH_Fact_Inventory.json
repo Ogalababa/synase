@@ -171,7 +171,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Copy data fact go",
+						"activity": "mapping Fact Inventory",
 						"dependencyConditions": [
 							"Succeeded"
 						]

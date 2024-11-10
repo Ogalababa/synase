@@ -207,7 +207,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Copy dim_go_employee",
+						"activity": "mappingDimEmployee",
 						"dependencyConditions": [
 							"Succeeded"
 						]

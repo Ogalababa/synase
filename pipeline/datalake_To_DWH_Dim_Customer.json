@@ -171,7 +171,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Copy go customer",
+						"activity": "mapping customer",
 						"dependencyConditions": [
 							"Succeeded"
 						]
