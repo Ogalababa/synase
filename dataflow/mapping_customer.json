@@ -101,7 +101,7 @@
 				"          Discount = 0,",
 				"          Name = '') ~> derivedColumn1",
 				"source1, derivedColumn1 join(LocationID == CustomerLocation,",
-				"     joinType:'inner',",
+				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",

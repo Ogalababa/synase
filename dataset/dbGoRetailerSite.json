@@ -1,0 +1,54 @@
+{
+	"name": "dbGoRetailerSite",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dbo.go_RETAILER_SITE.parquet",
+				"folderPath": "GO",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "RETAILER_SITE_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "ADDRESS1",
+				"type": "UTF8"
+			},
+			{
+				"name": "ADDRESS2",
+				"type": "UTF8"
+			},
+			{
+				"name": "CITY",
+				"type": "UTF8"
+			},
+			{
+				"name": "REGION",
+				"type": "UTF8"
+			},
+			{
+				"name": "POSTAL_ZONE",
+				"type": "UTF8"
+			},
+			{
+				"name": "COUNTRY_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "ACTIVE_INDICATOR",
+				"type": "BOOLEAN"
+			}
+		]
+	}
+}

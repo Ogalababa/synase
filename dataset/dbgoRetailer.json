@@ -1,0 +1,38 @@
+{
+	"name": "dbgoRetailer",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "lsconnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dbo.go_RETAILER.parquet",
+				"folderPath": "GO",
+				"fileSystem": "fsngroup6"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "RETAILER_CODE",
+				"type": "INT32"
+			},
+			{
+				"name": "RETAILER_CODEMR",
+				"type": "INT32"
+			},
+			{
+				"name": "COMPANY_NAME",
+				"type": "UTF8"
+			},
+			{
+				"name": "RETAILER_TYPE_CODE",
+				"type": "INT32"
+			}
+		]
+	}
+}

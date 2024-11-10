@@ -24,6 +24,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "ancCustomer"
+				},
+				{
+					"dataset": {
+						"referenceName": "dbGoRetailerSite",
+						"type": "DatasetReference"
+					},
+					"name": "goRetailer"
 				}
 			],
 			"sinks": [
@@ -40,6 +47,13 @@
 						"type": "LinkedServiceReference"
 					},
 					"name": "dimAncCustomer"
+				},
+				{
+					"linkedService": {
+						"referenceName": "lsconnection",
+						"type": "LinkedServiceReference"
+					},
+					"name": "dimGOLocationRetailer"
 				}
 			],
 			"transformations": [
@@ -51,6 +65,12 @@
 				},
 				{
 					"name": "mappingANCcustomer"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "mappingDImLocationRetailer"
 				}
 			],
 			"scriptLines": [
@@ -97,6 +117,20 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     format: 'parquet') ~> ancCustomer",
+				"source(output(",
+				"          RETAILER_SITE_CODE as integer,",
+				"          ADDRESS1 as string,",
+				"          ADDRESS2 as string,",
+				"          CITY as string,",
+				"          REGION as string,",
+				"          POSTAL_ZONE as string,",
+				"          COUNTRY_CODE as integer,",
+				"          ACTIVE_INDICATOR as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> goRetailer",
 				"goSalesBranch, country join(goSalesBranch@COUNTRY_CODE == country@COUNTRY_CODE,",
 				"     joinType:'left',",
 				"     matchType:'exact',",
@@ -106,6 +140,12 @@
 				"ancCustomer derive(LocationID = concatWS('_', toString(id), 'ANC'),",
 				"          Adress2 = '',",
 				"          Country = '') ~> mappingANCcustomer",
+				"goRetailer, country join(goRetailer@COUNTRY_CODE == country@COUNTRY_CODE,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 derive(LocationID = concatWS('_', toString(RETAILER_SITE_CODE), 'GO_Retailer')) ~> mappingDImLocationRetailer",
 				"mappingDimLoacation sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'parquet',",
@@ -130,7 +170,21 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> dimAncCustomer"
+				"     skipDuplicateMapOutputs: true) ~> dimAncCustomer",
+				"mappingDImLocationRetailer sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     fileSystem: 'fsngroup6',",
+				"     folderPath: 'dimGOLocationRetailer',",
+				"     truncate: true,",
+				"     compressionCodec: 'none',",
+				"     partitionFileNames:['dimGOLocationRetailer.parquet'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> dimGOLocationRetailer"
 			]
 		}
 	}

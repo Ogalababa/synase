@@ -5,6 +5,8 @@
 			{
 				"name": "mapping salesorde go",
 				"type": "ExecuteDataFlow",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -225,6 +227,8 @@
 			{
 				"name": "mapping salesorder anv",
 				"type": "ExecuteDataFlow",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "mapping salesorde go",
