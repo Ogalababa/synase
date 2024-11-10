@@ -748,6 +748,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/mapping_fact_salesorder')]",
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
 				"[concat(variables('workspaceId'), '/datasets/fact_salseorder')]",
 				"[concat(variables('workspaceId'), '/datasets/dwh_fact_salseorder')]",
 				"[concat(variables('workspaceId'), '/dataflows/salesorder anc')]",
