@@ -269,8 +269,6 @@
 					{
 						"name": "mapping salesorde go",
 						"type": "ExecuteDataFlow",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -545,6 +543,8 @@
 					{
 						"name": "Copy fact salesorder ANC",
 						"type": "Copy",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "mapping salesorder anv",
@@ -8725,12 +8725,6 @@
 						},
 						{
 							"name": "EmployeelKey"
-						},
-						{
-							"name": "joinEmployeelID"
-						},
-						{
-							"name": "derivedColumn1"
 						}
 					],
 					"scriptLines": [
@@ -8813,17 +8807,11 @@
 						"     broadcast: 'auto')~> joinOrderHeader",
 						"joinOrderHeader derive(EmployeeKey = concatWS('_', toString(SALES_STAFF_CODE), 'GO'),",
 						"          DateID = toDate(ORDER_DATE) - toDate(toTimestamp('1970-01-01', 'yyyy-MM-dd')),",
-						"          SalesorderID = concatWS('_', concatWS('_', toString(ORDER_DETAIL_CODE), toString(PRODUCT_NUMBER)), toString(QUANTITY))) ~> EmployeelKey",
-						"EmployeelKey, EmployeeID join(EmployeelKey@EmployeeKey == EmployeeID@Employeekey,",
-						"     joinType:'left',",
-						"     matchType:'exact',",
-						"     ignoreSpaces: false,",
-						"     broadcast: 'auto')~> joinEmployeelID",
-						"joinEmployeelID derive(ProductID = concatWS('_', toString(PRODUCT_NUMBER), 'GO'),",
-						"          LocationID = concatWS('_', toString(SALES_BRANCH_CODE), 'GO'),",
-						"          EmployeeID = EmployeelKey@EmployeeKey,",
-						"          CustomerID = concatWS('_', toString(RETAILER_SITE_CODE), 'GO')) ~> derivedColumn1",
-						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"          SalesorderID = concatWS('_', concatWS('_', toString(ORDER_DETAIL_CODE), toString(PRODUCT_NUMBER)), toString(QUANTITY)),",
+						"          LocationID = concatWS(\"_\", toString(SALES_BRANCH_CODE),\"GO\",\"Branch\"),",
+						"          CustomerID = concatWS(\"_\", toString(RETAILER_SITE_CODE),\"GO\"),",
+						"          ProductID = concatWS('_', toString(PRODUCT_NUMBER), 'GO')) ~> EmployeelKey",
+						"EmployeelKey sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
 						"     fileSystem: 'fsngroup6',",
