@@ -1138,8 +1138,10 @@
 						}
 					},
 					{
-						"name": "Copy go location",
+						"name": "Copy go  employee location",
 						"type": "Copy",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "mapping_dim_Location",
@@ -1254,7 +1256,7 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "dim_go_location",
+								"referenceName": "dim_go_location_salesbranch",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -1270,9 +1272,11 @@
 					{
 						"name": "Copy anc customer location",
 						"type": "Copy",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
-								"activity": "Copy go location",
+								"activity": "Copy go  employee location",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -1400,6 +1404,8 @@
 					{
 						"name": "Copy anc employee",
 						"type": "Copy",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "Copy anc customer location",
@@ -1526,6 +1532,131 @@
 								"parameters": {}
 							}
 						]
+					},
+					{
+						"name": "Copy go customer location",
+						"type": "Copy",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"LocationID"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "LocationID",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "LocationID",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ADDRESS1",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Adress",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "CITY",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "City",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "COUNTRY",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "Country",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "REGION",
+											"type": "String",
+											"physicalType": "UTF8"
+										},
+										"sink": {
+											"name": "State",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "dim_go_location_salesbranch",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "dwh_dim_location",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
 					}
 				],
 				"policy": {
@@ -1536,7 +1667,8 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/dataflows/mapping_country')]",
-				"[concat(variables('workspaceId'), '/datasets/dim_go_location')]",
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_go_location_salesbranch')]",
 				"[concat(variables('workspaceId'), '/datasets/dwh_dim_location')]",
 				"[concat(variables('workspaceId'), '/datasets/dim_anc_cus')]",
 				"[concat(variables('workspaceId'), '/datasets/dim_anc_employee')]"
@@ -4795,8 +4927,8 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "dim_anc_Cus_location_stagging-00001.parquet",
-						"folderPath": "dimAncCustomer",
+						"fileName": "dimAncCustomerLocation.parquet",
+						"folderPath": "dimAncCustomerLocation",
 						"fileSystem": "fsngroup6"
 					},
 					"compressionCodec": "snappy"
@@ -5382,7 +5514,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/dim_go_location')]",
+			"name": "[concat(parameters('workspaceName'), '/dim_go_location_salesbranch')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -5395,8 +5527,8 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "dim_go_location_stagging-00001.parquet",
-						"folderPath": "dim_go_location",
+						"fileName": "dim_go_location_salesbranch.parquet",
+						"folderPath": "dim_go_location_salesbranch",
 						"fileSystem": "fsngroup6"
 					},
 					"compressionCodec": "snappy"
@@ -8202,27 +8334,30 @@
 						"     validateSchema: false,",
 						"     format: 'parquet',",
 						"     fileSystem: 'fsngroup6',",
-						"     folderPath: 'dim_go_location',",
+						"     folderPath: 'dim_go_location_salesbranch',",
 						"     truncate: true,",
-						"     filePattern:'dim_go_location_stagging.parquet',",
+						"     compressionCodec: 'none',",
+						"     partitionFileNames:['dim_go_location_salesbranch'],",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> dimGoLocation",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> dimGoLocation",
 						"mappingANCcustomer sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
 						"     fileSystem: 'fsngroup6',",
-						"     folderPath: 'dimAncCustomer',",
+						"     folderPath: 'dimAncCustomerLocation',",
 						"     truncate: true,",
 						"     compressionCodec: 'none',",
-						"     filePattern:'dim_anc_Cus_location_stagging.parquet',",
+						"     partitionFileNames:['dimAncCustomerLocation.parquet'],",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> dimAncCustomer",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> dimAncCustomer",
 						"mappingDImLocationRetailer sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
