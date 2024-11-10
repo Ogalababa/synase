@@ -106,7 +106,7 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     format: 'parquet') ~> ancDepartment",
-				"go derive(EmployeeKey = concatWS(\"_\", toString(SALES_STAFF_CODE), \"GO_\"),",
+				"go derive(EmployeeKey = concatWS(\"_\", toString(SALES_STAFF_CODE), \"GO\"),",
 				"          Department = '',",
 				"          Employeestatus = '',",
 				"          Enddate = toDate(''),",
